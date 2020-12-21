@@ -101,11 +101,12 @@ public class ConceptSigmoidMotorSpeed extends LinearOpMode {
 		//robot.turnArcRadiusSigmoid(startingSpeed, targetSpeed, 12, 100);
 		//robot.turnArcRadiusSigmoid(targetSpeed, startingSpeed, 12, 100);
 		//  Implement Path C.
-		//robot.turnArcRadiusSigmoid (minSpeed, 1.0, 24.0, -200.0);
-		//robot.turnArcRadiusSigmoid(1.0, 1.0, 80.0, -200.0);
-		//robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, -200.0);
-		robot.turnArcRadiusSigmoid(minSpeed, -0.3, -48.0, 120.0); // backwards port
-		robot.turnArcRadiusSigmoid(-0.30, minSpeed, -48.0, -120.0); // backwards
+		robot.turnArcRadiusSigmoid (minSpeed, 1.0, 24.0, 190.0);
+		robot.turnArcRadiusSigmoid(1.0, 1.0, 76.0, 190.0); // arc was 80
+		robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 190.0);
+		//robot.turnArcRadiusSigmoid(minSpeed, -0.3, -48.0, 120.0); // backwards
+		// port
+		//robot.turnArcRadiusSigmoid(-0.30, minSpeed, -48.0, -120.0); // backwards
 		// starboard
 		// Turn off motors and signal completion.
 		//robot.leftDrive.setPower(0.0);
