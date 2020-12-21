@@ -150,14 +150,13 @@ public class Scrimmage3TeleOp extends LinearOpMode {
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.vuforiaLicenseKey = robot.VUFORIA_KEY;
         parameters.cameraDirection   = CAMERA_CHOICE;
 
-        // Extended tracking was disabled in the example, but we'll go for it.
-        parameters.useExtendedTracking = true;
+        // Extended tracking was disabled in the example.
+        parameters.useExtendedTracking = false;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
