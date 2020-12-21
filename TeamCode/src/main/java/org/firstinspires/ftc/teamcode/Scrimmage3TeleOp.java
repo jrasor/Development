@@ -156,8 +156,8 @@ public class Scrimmage3TeleOp extends LinearOpMode {
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection   = CAMERA_CHOICE;
 
-        // Make sure extended tracking is disabled for this example.
-        parameters.useExtendedTracking = false;
+        // Extended tracking was disabled in the example, but we'll go for it.
+        parameters.useExtendedTracking = true;
 
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
