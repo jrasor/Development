@@ -51,7 +51,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
-@TeleOp(name="UG Vuforia Navigate Tuner", group ="Concept")
+@TeleOp(name="Drive2XYHeadingTuner", group ="Concept")
 //@Disabled
 public class Drive2XYHeadingTuner extends LinearOpMode {
     private Pullbot robot = new Pullbot(this);

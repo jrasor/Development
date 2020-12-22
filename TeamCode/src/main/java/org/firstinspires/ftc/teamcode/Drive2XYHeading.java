@@ -49,7 +49,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
-@TeleOp(name="UG Vuforia Navigate", group ="Concept")
+@TeleOp(name="Drive2XYHeading", group ="Concept")
 //@Disabled
 public class Drive2XYHeading extends LinearOpMode {
     private Pullbot robot = new Pullbot(this);
@@ -245,15 +245,20 @@ public class Drive2XYHeading extends LinearOpMode {
                 telemetry.addLine("Visible target lost. Stopping.");
                 robot.leftDrive.setPower(0.0);
                 robot.rightDrive.setPower(0.0); // Todo: make a Pullbot method for this.
+                // Todo: try to recover from this by turning on axis, guessing
+                //  from last known position.
             } else {
                 telemetry.addLine("We have arrived. Stopping.");
+                robot.turnAngle (TURN_SPEED, -errorHeadingRadians);
+                // Disable Tracking when we are done;
                 robot.leftDrive.setPower(0.0);
                 robot.rightDrive.setPower(0.0);
-                sleep(3000);
+                targetsUltimateGoal.deactivate();
+                stop();
+                //sleep(500);
             }
         }
 
-        // Disable Tracking when we are done;
-        targetsUltimateGoal.deactivate();
+
     }
 }
