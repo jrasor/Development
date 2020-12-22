@@ -64,9 +64,8 @@ public class Drive2XYHeading extends LinearOpMode {
     static final double ERROR_X_TOLERANCE = 16.0;
     // avoids large and unstable bearing changes on final approach.
     double targetY = 35.5; // Also so robot can be near the picture.
-    double currentY = 40.0;  // We'll refine this by Vuforia if target image is
-    // visible.
-    double errorY = currentY = targetY;
+    double currentY;
+    double errorY;
     static final double ERROR_Y_TOLERANCE = 1.0;
     double targetHeadingDegrees = 0.0;
     double targetHeadingRadians = targetHeadingDegrees * Math.PI/180.0;
@@ -85,8 +84,7 @@ public class Drive2XYHeading extends LinearOpMode {
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.2;
     static final double Y_CORRECTION = -0.04;
-    static final double BEARING_CORRECTION = 1.2; // was 1.0
-    static final double HEADING_CORRECTION = 0.5; // was 0.5
+    static final double HEADING_CORRECTION = 0.5;
     static final double MAX_CORRECTION = TURN_SPEED;
     static final double MIN_CORRECTION = -TURN_SPEED;
 
@@ -98,13 +96,11 @@ public class Drive2XYHeading extends LinearOpMode {
         int cameraMonitorViewId =
             hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         robot.lastLocation = null;
-        //robot.vuforia = null;
         VuforiaLocalizer.Parameters parameters =
             new VuforiaLocalizer.Parameters(robot.cameraMonitorViewId);
         parameters.vuforiaLicenseKey = robot.VUFORIA_KEY;
         parameters.cameraDirection   = robot.CAMERA_CHOICE;
         parameters.useExtendedTracking = false;
-       // robot.vuforia = ClassFactory.getInstance().createVuforia(parameters);
         VuforiaTrackables targetsUltimateGoal =
             robot.vuforia.loadTrackablesFromAsset("UltimateGoal");
         VuforiaTrackable blueTowerGoalTarget = targetsUltimateGoal.get(0);
@@ -175,7 +171,7 @@ public class Drive2XYHeading extends LinearOpMode {
                 }
             }
 
-            // Say robot location and heading (if we know).
+            // Report robot location and heading (if we know).
             if (targetVisible) {
                 VectorF translation = robot.lastLocation.getTranslation();
                 telemetry.addData("Pos ", "{X, Y} = %5.1f\", %5.1f\"",
@@ -199,8 +195,6 @@ public class Drive2XYHeading extends LinearOpMode {
                 currentY = translation.get(1) / GenericFTCRobot.mmPerInch;
                 errorX = currentX - targetX;
                 errorY = currentY - targetY;
-                //telemetry.addData("Position", "X, Y = %4.1f, %4.1f",
-                //    currentX, currentY);
                 telemetry.addData("Position error", "X, Y = %4.1f, %4.1f",
                     errorX, errorY);
 
@@ -249,16 +243,14 @@ public class Drive2XYHeading extends LinearOpMode {
                 //  from last known position.
             } else {
                 telemetry.addLine("We have arrived. Stopping.");
+                // Clean up residual heading error.
                 robot.turnAngle (TURN_SPEED, -errorHeadingRadians);
-                // Disable Tracking when we are done;
                 robot.leftDrive.setPower(0.0);
                 robot.rightDrive.setPower(0.0);
+                // Disable Tracking when we are done.
                 targetsUltimateGoal.deactivate();
                 stop();
-                //sleep(500);
             }
         }
-
-
     }
 }
