@@ -413,6 +413,27 @@ public class Pullbot extends GenericFTCRobot {
     return ringsDetected;
   }
 
+  int CountWobblers (int viewID){
+    int wobblersDetected = 0;
+
+    ArrayList<RingOrientationAnalysisPipeline.AnalyzedRing> wobblers =
+        pipeline.getDetectedRings();
+    if (wobblers.isEmpty()) {
+      // ringsDetected will be left at zero.
+    } else {
+      for (RingOrientationAnalysisPipeline.AnalyzedRing wobbler :
+          wobblers) {
+        if (wobbler.left > 100) continue;
+        if (wobbler.top < 0) continue;
+        if (wobbler.width > 100) continue;
+        if (wobbler.height > 60 ) continue;
+        if (wobbler.aspectRatio > 1 && wobbler.aspectRatio <= 2) wobblersDetected = 4;
+        if (wobbler.aspectRatio > 2 && wobbler.aspectRatio <= 4) wobblersDetected = 1;
+      }
+    }
+    return wobblersDetected;
+  }
+
   /*
    *										Drive Train properties
    */
