@@ -53,7 +53,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 @TeleOp(name="UG Vuforia Navigate Tuner", group ="Concept")
 //@Disabled
-public class UGNavigateSimpleTuner extends LinearOpMode {
+public class Drive2XYHeadingTuner extends LinearOpMode {
     private Pullbot robot = new Pullbot(this);
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE =
         BACK;

@@ -51,7 +51,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 @TeleOp(name="UG Vuforia Navigate", group ="Concept")
 //@Disabled
-public class UGNavigateSimple extends LinearOpMode {
+public class Drive2XYHeading extends LinearOpMode {
     private Pullbot robot = new Pullbot(this);
     private boolean targetVisible = false;
     private float phoneXRotate    = 0.0f;
