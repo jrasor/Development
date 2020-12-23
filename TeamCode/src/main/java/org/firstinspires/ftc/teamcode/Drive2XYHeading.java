@@ -83,8 +83,8 @@ public class Drive2XYHeading extends LinearOpMode {
 
     static final double DRIVE_SPEED = 0.6;
     static final double TURN_SPEED = 0.2;
-    static final double Y_CORRECTION = -0.04;
-    static final double HEADING_CORRECTION = 0.5;
+    double yCorrection = -0.04;
+    double headingCorrection = 0.5;
     static final double MAX_CORRECTION = TURN_SPEED;
     static final double MIN_CORRECTION = -TURN_SPEED;
 
@@ -92,6 +92,22 @@ public class Drive2XYHeading extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        // Tune PID coefficients before running the approach.
+        while (! gamepad1.y){
+            telemetry.addLine("Tuning controls");
+            telemetry.addLine("  Pad left/right: more/less bearing correction.");
+            telemetry.addLine("  Green B button: more heading correction.");
+            telemetry.addLine("  Blue X button: less heading correction.");
+            telemetry.addLine("Press the Yellow Y button to finish tuning.");
+            if (gamepad1.dpad_right) {gamepad1.dpad_right = false; yCorrection *= 1.1; sleep(300);}
+            if (gamepad1.dpad_left) {gamepad1.dpad_left = false; yCorrection /= 1.1; sleep(300);}
+            if (gamepad1.b) {gamepad1.b = false; headingCorrection *= 1.1; sleep(300);}
+            if (gamepad1.x) {gamepad1.x = false; headingCorrection /= 1.1; sleep(300);}
+            telemetry.addData("Bearing correction",
+                " %5.3f  Heading correction %5.3f", yCorrection,
+                headingCorrection);
+            telemetry.update();
+        }
         robot.init(hardwareMap);
         int cameraMonitorViewId =
             hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -222,7 +238,7 @@ public class Drive2XYHeading extends LinearOpMode {
 
                 // find motor speed corrections.
                 correction =
-                    Y_CORRECTION * errorY - HEADING_CORRECTION * errorHeadingRadians;
+                    yCorrection * errorY - headingCorrection * errorHeadingRadians;
                 correction = Math.min(Math.max(correction, MIN_CORRECTION),
                     MAX_CORRECTION);
                 // Todo: slow down when errorX gets small.

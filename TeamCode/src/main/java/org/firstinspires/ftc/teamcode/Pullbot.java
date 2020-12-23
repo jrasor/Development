@@ -350,7 +350,7 @@ public class Pullbot extends GenericFTCRobot {
   /*
    *										Vision methods
    */
- 
+
   static class WobblerOrientationAnalysisPipeline extends OpenCvPipeline {
 
     @Override
