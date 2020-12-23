@@ -350,6 +350,14 @@ public class Pullbot extends GenericFTCRobot {
   /*
    *										Vision methods
    */
+ 
+  static class WobblerOrientationAnalysisPipeline extends OpenCvPipeline {
+
+    @Override
+    public Mat processFrame(Mat input) {
+      return null;
+    }
+  }
 
   static class RingOrientationAnalysisPipeline extends OpenCvPipeline {
 
