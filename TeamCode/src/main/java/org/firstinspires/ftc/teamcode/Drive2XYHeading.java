@@ -263,7 +263,7 @@ public class Drive2XYHeading extends LinearOpMode {
                 robot.turnAngle (TURN_SPEED, -errorHeadingRadians);
                 robot.leftDrive.setPower(0.0);
                 robot.rightDrive.setPower(0.0);
-                // Disable Tracking when we are done.
+                // Disable tracking when we are done.
                 targetsUltimateGoal.deactivate();
                 stop();
             }
