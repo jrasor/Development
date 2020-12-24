@@ -109,8 +109,6 @@ public class Drive2XYHeading extends LinearOpMode {
             telemetry.update();
         }
         robot.init(hardwareMap);
-        int cameraMonitorViewId =
-            hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         robot.lastLocation = null;
         VuforiaLocalizer.Parameters parameters =
             new VuforiaLocalizer.Parameters(robot.cameraMonitorViewId);

@@ -50,6 +50,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -222,6 +223,7 @@ public class Pullbot extends GenericFTCRobot {
   public static final int tooTall = 50;
 
   // Vuforia properties.
+  public VuforiaLocalizer.Parameters parameters;
   public VuforiaLocalizer vuforia;
   public OpenGLMatrix lastLocation;
   public static VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
@@ -319,7 +321,8 @@ public class Pullbot extends GenericFTCRobot {
         ClassFactory.getInstance().createVuforia(parameters);
     //initializationReport += "Camera is set up. Pipeline ";
     //initializationReport += (pipeline == null) ? "empty. ": "ready. ";
-
+    VuforiaTrackables targetsUltimateGoal =
+        vuforia.loadTrackablesFromAsset("UltimateGoal");
     // Define and initialize motors. Stop them.
     leftDrive = hwMap.get(DcMotorEx.class, "motor0");
     rightDrive = hwMap.get(DcMotorEx.class, "motor1");
