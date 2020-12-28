@@ -22,27 +22,32 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.Locale;
+
 /*
- *   Counts Rings in the Starter Stack.
+ *   Reports the number of Ultimate Goal Rings in a Starting Stack.
  */
 
-@TeleOp(name = "Ring Detection Simple", group = "Competition")
+@TeleOp(name = "Ring Detect Simple", group = "Vision test")
 //@Disabled
 public class RingDetectSimple extends LinearOpMode {
-  PullbotUG3 robot = new PullbotUG3 (this);
+
+  Pullbot robot = new Pullbot(this);
+
   @Override
   public void runOpMode() {
     robot.init(hardwareMap);
 
     waitForStart();
 
-    while(opModeIsActive()) {
-      telemetry.addData ("Rings detected",
-          robot.CountRings(robot.cameraMonitorViewId));
+    while (opModeIsActive()) {
+      int ringsDetected = robot.CountRings(robot.cameraMonitorViewId);
+      telemetry.addLine(String.format(Locale.US,
+          "Rings detected = %2d.",
+          ringsDetected));
       telemetry.update();
     }
   }
