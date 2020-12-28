@@ -37,7 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //@Disabled
 public class Scrimmage3Auto extends LinearOpMode {
 
-  PullbotNew robot = new PullbotNew(this);
+  Pullbot robot = new Pullbot(this);
   String initReport = "";
   double straightSpeed = 0.60;
   double turnSpeed = 0.30;
@@ -53,8 +53,15 @@ public class Scrimmage3Auto extends LinearOpMode {
   }
 
   private void doPathC (){
-    robot.turnArcRadiusDrive (turnSpeed, 123.0, 157.0);
-    robot.turnArcRadiusDrive (turnSpeed, -46.0, 157.0);
+    //  Push Wobbler to Goal Zone C
+    //robot.turnArcRadiusDrive (turnSpeed, 123.0, 157.0);
+    //robot.turnArcRadiusDrive (turnSpeed, -46.0, 157.0);
+    robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 190.0);
+    robot.turnArcRadiusSigmoid(1.0, 1.0, 60.0, 190.0);
+    robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 190.0);
+    //  Back out to the Launch Line.
+    robot.turnArcRadiusSigmoid(0.0, -1.0, -20.0, 190.0);
+    robot.turnArcRadiusSigmoid(-1.0, 0.0, -20.0, 190.0);
   }
 
   @Override

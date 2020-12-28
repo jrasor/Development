@@ -64,7 +64,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class Calibrate extends LinearOpMode {
   private static final double DRIVE_SPEED = 0.30;  // was 0.6
   private static final double TURN_SPEED = 0.15;  // was 0.2
-  PullbotNew robot = new PullbotNew(this);
+  Pullbot robot = new Pullbot(this);
 
   @Override
   public void runOpMode() {

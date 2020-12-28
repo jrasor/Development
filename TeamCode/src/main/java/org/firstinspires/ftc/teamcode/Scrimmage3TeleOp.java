@@ -90,6 +90,7 @@ public class Scrimmage3TeleOp extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
+    /*                     = = Vuforia initialization. = =                  */
     // IMPORTANT:  For Phone Camera, set 1) the camera source and 2) the orientation, based on how your phone is mounted:
     // 1) Camera Source.  Valid choices are:  BACK (behind screen) or FRONT (selfie side)
     // 2) Phone Orientation. Choices are: PHONE_IS_PORTRAIT = true (portrait) or PHONE_IS_PORTRAIT = false (landscape)
@@ -133,7 +134,7 @@ public class Scrimmage3TeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        PullbotNew robot = new PullbotNew(this);
+        Pullbot robot = new Pullbot(this);
         String initReport = robot.init(hardwareMap);
         telemetry.addData("Robot status", "initialized.");
         telemetry.addData("Initialization report", initReport);
@@ -150,12 +151,13 @@ public class Scrimmage3TeleOp extends LinearOpMode {
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = robot.VUFORIA_KEY;
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection   = CAMERA_CHOICE;
 
-        // Extended tracking was disabled in the example.
+        // Make sure extended tracking is disabled for this example.
         parameters.useExtendedTracking = false;
 
         //  Instantiate the Vuforia engine

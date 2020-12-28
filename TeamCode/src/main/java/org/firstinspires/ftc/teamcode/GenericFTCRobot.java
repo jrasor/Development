@@ -1,11 +1,6 @@
 package org.firstinspires.ftc.teamcode;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-
-import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 /**
  * This is NOT an opmode
@@ -58,6 +53,7 @@ public abstract class GenericFTCRobot {
           "zUWClcasxi6Nty7SUvV+gaq3CzpKVtjKk+2EwV6ibIc0V47LAeB0lDGsGkSzuJ+" +
           "93/Ulpoj+Lwr/jbI2mu/Bs2W7U9mw73CMxvDix9o1FxyPNablla4W5C5lUDm0j2" +
           "lW5gsUNOhgvlWKQ+eCu9IBp53WbW5nfNzhXPaDDh/IlBbZuAMIJuMDEHI5PVLKT9L";
+
   /*                          Vision members.                         */
   /*
    * Get a Vuforia 'Development' license key for free from the Vuforia
@@ -65,26 +61,18 @@ public abstract class GenericFTCRobot {
    * web site at https://developer.vuforia.com/license-manager.
    *
    * Once you have a license key, copy the string from the Vuforia web site
-   * and paste it in to your code on the next line, between the double quotes.
-   *
-   * You can chop it up into substrings as shown here.
+   * and paste it in to your code as above, perhaps into substrings as shown
+   * here.
    */
   // IMPORTANT:  For Phone Camera, set 1) the camera source and 2) the
-  // orientation, based on
-  // how your phone is mounted:
+  // orientation, based on how your phone is mounted:
   //      1) Camera Source.  Valid choices are:  BACK (behind screen) or
   //      FRONT (selfie side)
   //      2) Phone Orientation. Choices are: PHONE_IS_PORTRAIT = true
-  //      (portrait) or
-  //      PHONE_IS_PORTRAIT = false (landscape)
+  //      (portrait) or PHONE_IS_PORTRAIT = false (landscape)
   //
   // NOTE: If you are running on a CONTROL HUB, with only one USB WebCam,
-  // you must select
-  // CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
-  // A HardwarePullbot uses an Expansion Hub.
+  // you must select CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
+  // A Pullbot, which extends this, uses an Expansion Hub.
   //
-  private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
-  private static final boolean PHONE_IS_PORTRAIT = false;
-
-  VuforiaLocalizer vuforia;
 }

@@ -166,7 +166,6 @@ public class PullbotNew extends GenericFTCRobot {
     String initializationReport = "";
     // Initialize vision hardware.
     colorSensor = hwMap.get(ColorSensor.class, "colorSensor");
-
     // Create camera instance
     cameraMonitorViewId =
         someHWMap.appContext.getResources().getIdentifier(
@@ -176,7 +175,6 @@ public class PullbotNew extends GenericFTCRobot {
     phoneCam =
         OpenCvCameraFactory.getInstance().createInternalCamera2
             (OpenCvInternalCamera2.CameraDirection.BACK, cameraMonitorViewId);
-
 
     // Open async and start streaming inside opened callback
     phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
@@ -376,7 +374,6 @@ public class PullbotNew extends GenericFTCRobot {
         if (ring.aspectRatio > 2 && ring.aspectRatio <= 4) ringsDetected = 1;
       }
     }
-
     return ringsDetected;
   }
 

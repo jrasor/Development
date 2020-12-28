@@ -33,7 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "Ring Detection Simple", group = "Competition")
 //@Disabled
 public class RingDetectSimple extends LinearOpMode {
-  PullbotNew robot = new PullbotNew(this);
+  PullbotUG3 robot = new PullbotUG3 (this);
   @Override
   public void runOpMode() {
     robot.init(hardwareMap);

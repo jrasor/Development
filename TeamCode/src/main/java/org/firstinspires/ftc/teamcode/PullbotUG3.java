@@ -47,7 +47,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -66,7 +69,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
-import static org.firstinspires.ftc.teamcode.Pullbot.RingOrientationAnalysisPipeline.Stage.values;
+import static org.firstinspires.ftc.teamcode.PullbotUG3.RingOrientationAnalysisPipeline.Stage.values;
 
 /**
  * This is NOT an opmode.
@@ -99,13 +102,9 @@ import static org.firstinspires.ftc.teamcode.Pullbot.RingOrientationAnalysisPipe
  * v 2.2  12/1/20: improved nudging and simple driving.
  *        12/2/20 Feature freeze for UGScrimmage2.
  * v 3.0  12/2/20 Initial commit, a copy of UGScrimmage2.
- * v 3.1  12/9/20 Sigmoid motion profiling added.
- * v 3.2  12/16/20 Improved PID approach to Blue Tower Goal with Vuforia.
- * v 3.3beta  12/26/20 Production candidate for Scrimmage 3, and cleanup of
- *            the 12/24 Pullbot mess.
  */
 
-public class Pullbot extends GenericFTCRobot {
+public class PullbotUG3 extends GenericFTCRobot {
 
   // Vision properties
   public OpenCvInternalCamera2 phoneCam;
@@ -139,14 +138,6 @@ public class Pullbot extends GenericFTCRobot {
   static final double COUNTS_PER_INCH =
       (COUNTS_PER_MOTOR_TURN * DRIVE_GEAR_REDUCTION) /
           (DRIVE_WHEEL_DIAMETER * Math.PI);
-  static final double DISTANCE_PER_TURN = DRIVE_WHEEL_DIAMETER * Math.PI;
-  /// 11.00" per second.
-  // NeveRest40 free run: 160 rpm. Go about 80% of that, so encoders work at
-  // high speed under load.
-  static final double MAX_MOTOR_RPM = 129;
-  static final double MAX_WHEEL_TURNS_PER_SECOND = MAX_MOTOR_RPM / 60; //2.15
-  static final double MAX_DRIVE_SPEED =
-      MAX_WHEEL_TURNS_PER_SECOND * DISTANCE_PER_TURN; // 23.64"/s
 
   // Arm related properties
   public final double DEPLOYED = 1.0;   // arm extended in front of the Pullbot
@@ -157,7 +148,10 @@ public class Pullbot extends GenericFTCRobot {
 
   // Pullbot specific sensor members.
   public ColorSensor colorSensor;
+  public VuforiaLocalizer.Parameters parameters;
+  public VuforiaLocalizer vuforia;
   public static VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+  public OpenGLMatrix lastLocation;
   /* local OpMode members. */
 
   // Initialization.
@@ -166,10 +160,10 @@ public class Pullbot extends GenericFTCRobot {
   private ElapsedTime period = new ElapsedTime();
 
   /* Constructors */
-  public Pullbot() {
+  public PullbotUG3() {
     super();
   }
-  public Pullbot(LinearOpMode linearOpMode) {
+  public PullbotUG3(LinearOpMode linearOpMode) {
     currentOpMode = linearOpMode;
   }
 
@@ -203,7 +197,18 @@ public class Pullbot extends GenericFTCRobot {
     //initializationReport += "Camera is set up. Pipeline ";
     //initializationReport += (pipeline == null) ? "empty. ": "ready. ";
 
-
+    VuforiaLocalizer.Parameters parameters =
+        new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+    parameters.vuforiaLicenseKey = VUFORIA_KEY;
+    parameters.cameraDirection   = CAMERA_CHOICE;
+    parameters.useExtendedTracking = false;
+    vuforia =
+        ClassFactory.getInstance().createVuforia(parameters);
+    //initializationReport += "Camera is set up. Pipeline ";
+    //initializationReport += (pipeline == null) ? "empty. ": "ready. ";
+    VuforiaTrackables targetsUltimateGoal =
+        vuforia.loadTrackablesFromAsset("UltimateGoal");
+    
     // Define and initialize motors. Stop them.
     leftDrive = hwMap.get(DcMotorEx.class, "motor0");
     rightDrive = hwMap.get(DcMotorEx.class, "motor1");
@@ -550,39 +555,6 @@ public class Pullbot extends GenericFTCRobot {
   public void turnArcRadiusDrive(double speed, double arc, double radius) {
     double targetAngle = arc / radius;
     turnAngleRadiusDrive(speed, targetAngle, radius);
-  }
-
-  public double turnArcRadiusSigmoid (double startSpeed, double endSpeed,
-                                      double arc, double radius){
-    double time;
-    double speed;
-    double leftSpeed, rightSpeed;
-    double speedScale = endSpeed - startSpeed;
-    double averageSpeed = (startSpeed + endSpeed) / 2.0;
-    // Todo: What if radius is negative?
-    double turnFudgeFactor =
-        (radius + DRIVE_WHEEL_SEPARATION/2.0) / radius;
-    double time2DoIt = arc / (averageSpeed * MAX_DRIVE_SPEED);
-    runtime.reset();
-    do {
-      time = runtime.time();
-      speed = startSpeed + speedScale * (0.5 - 0.5 * Math.cos(Math.PI * time / time2DoIt));
-      leftSpeed = -speed / turnFudgeFactor;
-      rightSpeed = -speed * turnFudgeFactor;
-      // Normalize speeds so greater is 1, and the lesser is scaled down by the lesser/greater ratio.
-      if (Math.abs(leftSpeed) > 1.0) {
-        rightSpeed = rightSpeed/ Math.abs(leftSpeed);
-        leftSpeed = Math.signum(leftSpeed); // was -1.0
-      }
-      if (Math.abs(rightSpeed) > 1.0) {
-        leftSpeed = leftSpeed/ Math.abs(rightSpeed);
-        rightSpeed = Math.signum(rightSpeed); // was -1.0
-      }
-
-      leftDrive.setPower(leftSpeed);
-      rightDrive.setPower(rightSpeed);
-    } while (time < time2DoIt);
-    return time2DoIt;
   }
 
   // TurnAngleArc not implemented.
