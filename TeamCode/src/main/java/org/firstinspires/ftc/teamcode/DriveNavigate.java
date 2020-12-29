@@ -59,6 +59,10 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
+import static org.firstinspires.ftc.teamcode.GenericFTCRobot.mmPerInch;
+import static org.firstinspires.ftc.teamcode.Navigator.CAMERA_CHOICE;
+import static org.firstinspires.ftc.teamcode.Pullbot.CAMERA_LEFT_DISPLACEMENT;
+import static org.firstinspires.ftc.teamcode.Pullbot.CAMERA_VERTICAL_DISPLACEMENT;
 
 /**
  * This 2020-2021 OpMode illustrates the basics of using the Vuforia
@@ -121,8 +125,8 @@ public class DriveNavigate extends LinearOpMode {
   // NOTE: If you are running on a CONTROL HUB, with only one USB WebCam, you
   // must select CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
   //
-  private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
-  private static final boolean PHONE_IS_PORTRAIT = false;
+  //private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+  //private static final boolean PHONE_IS_PORTRAIT = false;
 
   /*
    * IMPORTANT: You need to obtain your own license key to use Vuforia. The
@@ -141,19 +145,19 @@ public class DriveNavigate extends LinearOpMode {
    *  site
    * and paste it in to your code on the next line, between the double quotes.
    */
-  private static final String VUFORIA_KEY =
-      GenericFTCRobot.VUFORIA_KEY;
+  //private static final String VUFORIA_KEY =
+    //  GenericFTCRobot.VUFORIA_KEY;
 
   // Since ImageTarget trackables use mm to specifiy their dimensions, we
   // must use mm for all the physical dimension.
   // We will define some constants and conversions here
-  private static final float mmPerInch = 25.4f;
-  private static final float mmTargetHeight = (6) * mmPerInch;          //
+  //private static final float mmPerInch = 25.4f;
+  //private static final float mmTargetHeight = (6) * mmPerInch;          //
     // the height of the center of the target image above the floor
 
   // Constants for perimeter targets
-  private static final float halfField = 72 * mmPerInch;
-  private static final float quadField = 36 * mmPerInch;
+  //private static final float halfField = 72 * mmPerInch;
+  //private static final float quadField = 36 * mmPerInch;
 
   // Class Members
   private OpenGLMatrix lastLocation = null;
@@ -168,6 +172,7 @@ public class DriveNavigate extends LinearOpMode {
     Pullbot robot = new Pullbot(this);
     Navigator navigator = new Navigator(this);
     String initReport = robot.init(hardwareMap);
+    initReport += navigator.init(hardwareMap);
     telemetry.addData("Robot status", "initialized.");
     telemetry.addData("Initialization report", initReport);
     telemetry.update();
@@ -184,29 +189,30 @@ public class DriveNavigate extends LinearOpMode {
      * If no camera monitor is desired, use the parameter-less constructor
      * instead (commented out below).
      */
-    int cameraMonitorViewId =
-        hardwareMap.appContext.getResources().getIdentifier(
-            "cameraMonitorViewId", "id",
-            hardwareMap.appContext.getPackageName());
-    VuforiaLocalizer.Parameters parameters =
-        new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+    //int cameraMonitorViewId =
+     //   hardwareMap.appContext.getResources().getIdentifier(
+     //       "cameraMonitorViewId", "id",
+     //       hardwareMap.appContext.getPackageName());
+    //VuforiaLocalizer.Parameters parameters =
+     //   new VuforiaLocalizer.Parameters(navigator.cameraMonitorViewId);
 
     // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer
       // .Parameters();
 
-    parameters.vuforiaLicenseKey = VUFORIA_KEY;
-    parameters.cameraDirection = CAMERA_CHOICE;
+    //parameters.vuforiaLicenseKey = GenericFTCRobot.VUFORIA_KEY;
+    //parameters.cameraDirection = Navigator.CAMERA_CHOICE;
 
     // Make sure extended tracking is disabled for this example.
-    parameters.useExtendedTracking = false;
+    //parameters.useExtendedTracking = false;
 
     //  Instantiate the Vuforia engine
-    vuforia = ClassFactory.getInstance().createVuforia(parameters);
+    //vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
     // Load the data sets for the trackable objects. These particular data
     // sets are stored in the 'assets' part of our application.
-    VuforiaTrackables targetsUltimateGoal =
-        this.vuforia.loadTrackablesFromAsset("UltimateGoal");
+    //VuforiaTrackables targetsUltimateGoal =
+    //    navigator.vuforia.loadTrackablesFromAsset("UltimateGoal");
+    /*
     VuforiaTrackable blueTowerGoalTarget = targetsUltimateGoal.get(0);
     blueTowerGoalTarget.setName("Blue Tower Goal Target");
     VuforiaTrackable redTowerGoalTarget = targetsUltimateGoal.get(1);
@@ -217,11 +223,11 @@ public class DriveNavigate extends LinearOpMode {
     blueAllianceTarget.setName("Blue Alliance Target");
     VuforiaTrackable frontWallTarget = targetsUltimateGoal.get(4);
     frontWallTarget.setName("Front Wall Target");
-
+*/
     // For convenience, gather together all the trackable objects in one
       // easily-iterable collection */
-    List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
-    allTrackables.addAll(targetsUltimateGoal);
+   // List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+   // allTrackables.addAll(targetsUltimateGoal);
 
     /**
      * In order for localization to work, we need to tell the system where
@@ -254,6 +260,7 @@ public class DriveNavigate extends LinearOpMode {
 
     //Set the position of the perimeter targets with relation to origin
       // (center of field)
+    /*
     redAllianceTarget.setLocation(OpenGLMatrix
         .translation(0, -halfField, mmTargetHeight)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90
@@ -299,7 +306,7 @@ public class DriveNavigate extends LinearOpMode {
       // the front of the robot.
 
     // We need to rotate the camera around it's long axis to bring the
-      // correct camera forward.
+      // correct camera forward. Todo: it's --> its.
     if (CAMERA_CHOICE == BACK) {
       phoneYRotate = -90;
     } else {
@@ -307,30 +314,35 @@ public class DriveNavigate extends LinearOpMode {
     }
 
     // Rotate the phone vertical about the X axis if it's in portrait mode
-    if (PHONE_IS_PORTRAIT) {
+    if (Navigator.PHONE_IS_PORTRAIT) {
       phoneXRotate = 90;
     }
 
     // Next, translate the camera lens to where it is on the robot.
     // In this example, it is centered (left to right), but forward of the
       // middle of the robot, and above ground level.
-    final float CAMERA_FORWARD_DISPLACEMENT = 4.0f * mmPerInch;   // eg:
+    //final float CAMERA_FORWARD_DISPLACEMENT = 4.0f * mmPerInch;   // eg:
       // Camera is 4 Inches in front of robot center
-    final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg:
+    //final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg:
       // Camera is 8 Inches above ground
-    final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the
+    //final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the
       // robot's center line
 
     OpenGLMatrix robotFromCamera = OpenGLMatrix
-        .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT,
+        .translation(Pullbot.CAMERA_FORWARD_DISPLACEMENT,
+            CAMERA_LEFT_DISPLACEMENT,
             CAMERA_VERTICAL_DISPLACEMENT)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES,
             phoneYRotate, phoneZRotate, phoneXRotate));
 
+     */
+
     /**  Let all the trackable listeners know where the phone is.  */
-    for (VuforiaTrackable trackable : allTrackables) {
-      ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
-    }
+    //for (VuforiaTrackable trackable : navigator.allTrackables) {
+    //  ((VuforiaTrackableDefaultListener)
+    //      trackable.getListener()).setPhoneInformation(navigator
+    //      .robotFromCamera, parameters.cameraDirection);
+   // }
 
     // WARNING:
     // In this sample, we do not wait for PLAY to be pressed.  Target
@@ -348,15 +360,16 @@ public class DriveNavigate extends LinearOpMode {
       // select "Camera Stream"
     // Tap the preview window to receive a fresh image.
 
-    targetsUltimateGoal.activate();
+    //navigator.targetsUltimateGoal.activate();
 
     while (!isStopRequested()) {
       //robot.simpleDrive();
       robot.tankDrive();
       robot.enableNudge();
+
       // check all the trackable targets to see which one (if any) is visible.
       targetVisible = false;
-      for (VuforiaTrackable trackable : allTrackables) {
+      for (VuforiaTrackable trackable : navigator.allTrackables) {
         if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
           telemetry.addData("Visible Target", trackable.getName());
           targetVisible = true;
@@ -391,7 +404,7 @@ public class DriveNavigate extends LinearOpMode {
       } else {
         telemetry.addData("Visible Target", "none");
       }
-            
+
       telemetry.addData("Colors",
           "Red %4d   Green %4d   Blue %4d",
           robot.colorSensor.red(), robot.colorSensor.green(),
@@ -399,7 +412,9 @@ public class DriveNavigate extends LinearOpMode {
       telemetry.update();
     }
 
+
+
     // Disable Tracking when we are done;
-    targetsUltimateGoal.deactivate();
+    navigator.targetsUltimateGoal.deactivate();
   }
 }

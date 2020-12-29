@@ -22,8 +22,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public abstract class GenericFTCRobot {
   public GenericFTCRobot() {
-
   }
+
   private LinearOpMode currentOpMode;
   public GenericFTCRobot(LinearOpMode linearOpMode) {
     //super (linearOpMode);

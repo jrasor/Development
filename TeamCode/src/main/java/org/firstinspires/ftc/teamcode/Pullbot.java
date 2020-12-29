@@ -110,13 +110,24 @@ public class Pullbot extends GenericFTCRobot {
   // Vision properties
   public OpenCvInternalCamera2 phoneCam;
   public RingOrientationAnalysisPipeline pipeline;
+  // Where the camera lens with respect to the robot.
+  // On this robot class, it is centered (left to right), but forward of the
+  // middle of the robot, and above ground level.
+  public static final float CAMERA_FORWARD_DISPLACEMENT =
+      4.0f * Navigator.mmPerInch;   //
+  // eg:
+  // Camera is 4 Inches in front of robot center
+  public static final float CAMERA_VERTICAL_DISPLACEMENT =
+      8.0f * Navigator.mmPerInch;   // eg:
+  // Camera is 8 Inches above ground
+  public static final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the
+  // robot's center line
   public static boolean PHONE_IS_PORTRAIT = false;
   public int cameraMonitorViewId;
   public static final int tooFarRight = 100;
   public static final int tooHigh = 140;
   public static final int tooWide = 70;
   public static final int tooTall = 50;
-
 
   // Field related constants.
   public static final float mmPerInch = 25.4f; // use mm dimensions
