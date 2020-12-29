@@ -114,11 +114,11 @@ public class Pullbot extends GenericFTCRobot {
   // On this robot class, it is centered (left to right), but forward of the
   // middle of the robot, and above ground level.
   public static final float CAMERA_FORWARD_DISPLACEMENT =
-      4.0f * Navigator.mmPerInch;   //
+      4.0f * GenericFTCRobot.mmPerInch;   //
   // eg:
   // Camera is 4 Inches in front of robot center
   public static final float CAMERA_VERTICAL_DISPLACEMENT =
-      8.0f * Navigator.mmPerInch;   // eg:
+      8.0f * GenericFTCRobot.mmPerInch;   // eg:
   // Camera is 8 Inches above ground
   public static final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the
   // robot's center line
@@ -130,14 +130,14 @@ public class Pullbot extends GenericFTCRobot {
   public static final int tooTall = 50;
 
   // Field related constants.
-  public static final float mmPerInch = 25.4f; // use mm dimensions
+  //public static final float mmPerInch = 25.4f; // use mm dimensions
   // Constants for perimeter Vuforia navigation targets
   // Field outside: 12'. Inside: 1" shorter than that, each Wall.
-  public static final float fullField = 142 * mmPerInch;
+  public static final float fullField = 142 * GenericFTCRobot.mmPerInch;
   public static final float halfField = fullField / 2;
   public static final float quarterField = fullField / 4;
   // the height of the center of the target image above the floor
-  public static final float mmTargetHeight = (6) * mmPerInch;
+  public static final float mmTargetHeight = (6) * GenericFTCRobot.mmPerInch;
 
   /* Drive train. */
   // Drive train related constants in inches.
@@ -186,7 +186,7 @@ public class Pullbot extends GenericFTCRobot {
 
   public String init(HardwareMap someHWMap) {
     hwMap = someHWMap;
-    String initializationReport = "";
+    String initializationReport = "Pullbot initialization: ";
     // Initialize vision hardware.
     colorSensor = hwMap.get(ColorSensor.class, "colorSensor");
 

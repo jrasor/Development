@@ -128,8 +128,8 @@ public class Navigator extends GenericFTCRobot {
   // the height of the center of the target image above the floor
 
   // Constants for perimeter targets
-  private static final float halfField = 72 * mmPerInch;
-  private static final float quadField = 36 * mmPerInch;
+  private static final float halfField = 72 * GenericFTCRobot.mmPerInch;
+  private static final float quadField = 36 * GenericFTCRobot.mmPerInch;
 
   // Class Members
   public OpenGLMatrix robotFromCamera;
@@ -154,10 +154,11 @@ public class Navigator extends GenericFTCRobot {
   }
 
   public int cameraMonitorViewId;
-  public List<VuforiaTrackable> allTrackables;
+
   public VuforiaTrackables targetsUltimateGoal;
+  public List<VuforiaTrackable> allTrackables;
   public String init(HardwareMap someHWMap) {
-    String initializationReport = "";
+    String initializationReport = "Navigator initialization: ";
     hwMap = someHWMap;
 
     /*
@@ -208,7 +209,7 @@ public class Navigator extends GenericFTCRobot {
         ". ";
     // For convenience, gather together all the trackable objects in one
     // easily-iterable collection */
-    List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+    allTrackables = new ArrayList<VuforiaTrackable>();
     allTrackables.addAll(targetsUltimateGoal);
 
     /**
@@ -302,27 +303,28 @@ public class Navigator extends GenericFTCRobot {
     // Next, translate the camera lens to where it is on the robot.
     // In this example, it is centered (left to right), but forward of the
     // middle of the robot, and above ground level.
-    final float CAMERA_FORWARD_DISPLACEMENT = 4.0f * mmPerInch;   // eg:
+    final float CAMERA_FORWARD_DISPLACEMENT =
+        4.0f * GenericFTCRobot.mmPerInch;   // eg:
     // Camera is 4 Inches in front of robot center
-    final float CAMERA_VERTICAL_DISPLACEMENT = 8.0f * mmPerInch;   // eg:
+    final float CAMERA_VERTICAL_DISPLACEMENT =
+        8.0f * GenericFTCRobot.mmPerInch;   // eg:
     // Camera is 8 Inches above ground
     final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the
     // robot's center line
 
-    OpenGLMatrix robotFromCamera = OpenGLMatrix
+    robotFromCamera = OpenGLMatrix
         .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT,
             CAMERA_VERTICAL_DISPLACEMENT)
         .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES,
             phoneYRotate, phoneZRotate, phoneXRotate));
 
-    initializationReport += " Gathered " + allTrackables.size() + " " +
-        "trackables.";
     /**  Let all the trackable listeners know where the phone is.  */
     for (VuforiaTrackable trackable : allTrackables) {
       ((VuforiaTrackableDefaultListener)
           trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
     }
-
+    initializationReport += allTrackables.size() + " trackables got their " +
+        "camera location and direction. ";
     // WARNING:
     // In this sample, we do not wait for PLAY to be pressed.  Target
     // Tracking is started immediately when INIT is pressed.
@@ -342,6 +344,8 @@ public class Navigator extends GenericFTCRobot {
     targetsUltimateGoal.activate();
     return initializationReport;
     };
+
+  //  Usage methods go here.
 
   public String Hello() {
     return "Hello, world, from Navigator!";
