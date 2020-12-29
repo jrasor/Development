@@ -636,6 +636,7 @@ public class Pullbot extends GenericFTCRobot {
   /*                      Command layer.                    */
   // Human driver issues commands with gamepad.
   public void enableNudge () {
+
     // Gamepad mapping is similar to tank drive.
     if (currentOpMode.gamepad1.left_trigger > 0){
       // nudge left wheel forward a little

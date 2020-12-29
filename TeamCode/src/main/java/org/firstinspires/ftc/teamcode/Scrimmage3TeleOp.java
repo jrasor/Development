@@ -52,7 +52,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@TeleOp(name = "Scrimmage3 TeleOp", group = "Concept")
+@TeleOp(name = "Scrimmage3 TeleOp", group = "Competition")
 //@Disabled
 public class Scrimmage3TeleOp extends LinearOpMode {
 
