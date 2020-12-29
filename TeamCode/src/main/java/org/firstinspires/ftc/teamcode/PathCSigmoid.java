@@ -70,43 +70,23 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name = "Path C Sigmoid Demo", group = "Concept")
 //@Disabled
 public class PathCSigmoid extends LinearOpMode {
-
-  double minSpeed = 0.0;
-  double startingSpeed;
-  double targetSpeed;
-  double time2DoIt = 1.0; // seconds to go from start speed to target speed.
-  double time;
-
+  Pullbot robot;
   @Override
   public void runOpMode() {
-    ElapsedTime runtime = new ElapsedTime();
-
-    Pullbot robot = new Pullbot(this);
+    robot = new Pullbot(this);
     robot.init(hardwareMap);
-    robot.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    //robot.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     waitForStart();
 
-    targetSpeed = 0.5;
-    double targetFieldSpeed = targetSpeed * robot.MAX_DRIVE_SPEED;
-    startingSpeed = minSpeed;
-    telemetry.addData(
-        "Testing", "%5.2f sec speed change from %5.3f to %5.3f",
-        time2DoIt, startingSpeed, targetSpeed);
-    telemetry.addData(">", "Press Start to run.");
-    telemetry.update();
-
-    //robot.changeSpeedSigmoid(time2DoIt, startingSpeed, targetSpeed, 0.85);
-    //robot.changeSpeedSigmoid(time2DoIt, targetSpeed, startingSpeed, 1.0/0.85);
-    //robot.accelerateDistanceSigmoid(24, startingSpeed, targetSpeed, 0.85);
-    //  Decelerate now from target speed to rest.
-    //robot.accelerateDistanceSigmoid(24, targetSpeed, startingSpeed, 1.0/0.85);
-    //robot.turnArcRadiusSigmoid(startingSpeed, targetSpeed, 12, 100);
-    //robot.turnArcRadiusSigmoid(targetSpeed, startingSpeed, 12, 100);
-    //  Implement Path C.
-    robot.turnArcRadiusSigmoid(minSpeed, 1.0, 24.0, 190.0);
-    robot.turnArcRadiusSigmoid(1.0, 1.0, 76.0, 190.0); // arc was 80
+    //  Implement Path C inbound and outbound.
+    robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 190.0);
+    robot.turnArcRadiusSigmoid(1.0, 1.0, 76.0, 190.0);
     robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 190.0);
+    //  Back out to the Launch Line.
+    robot.turnArcRadiusSigmoid(0.0, -1.0, -20.0, 190.0);
+    robot.turnArcRadiusSigmoid(-1.0, 0.0, -20.0, 190.0);
+
     //robot.turnArcRadiusSigmoid(minSpeed, -0.3, -48.0, 120.0); // backwards
     // port
     //robot.turnArcRadiusSigmoid(-0.30, minSpeed, -48.0, -120.0); // backwards
