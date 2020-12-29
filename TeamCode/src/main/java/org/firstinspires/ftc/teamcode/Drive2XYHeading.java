@@ -104,7 +104,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  */
 
 
-@TeleOp(name = "Drive2XYHeading (from TeleOP)", group = "Concept")
+@TeleOp(name = "Drive2XYHeading", group = "Concept")
 //@Disabled
 public class Drive2XYHeading extends LinearOpMode {
 

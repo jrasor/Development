@@ -347,9 +347,6 @@ public class Navigator extends GenericFTCRobot {
 
   //  Usage methods go here.
 
-  public String Hello() {
-    return "Hello, world, from Navigator!";
-  }
 }
 
 
