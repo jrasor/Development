@@ -62,9 +62,9 @@ public class TestJoystick extends LinearOpMode {
       double drive = -gamepad1.left_stick_y;
       double turn = gamepad1.right_stick_x;
       double driveCommand = temperedControl(drive);
-      driveCommand = Range.clip(driveCommand + turn, -1.0, 1.0);
+      driveCommand = Range.clip(driveCommand, -1.0, 1.0);
       double turnCommand = temperedControl(turn);
-      turnCommand = Range.clip(driveCommand - turnCommand, -1.0, 1.0);
+      turnCommand = Range.clip(turnCommand, -1.0, 1.0);
 
       // Show the tempered and clipped joystick commands.
       telemetry.addData("Commands", " drive (%.2f), turn (%.2f)",
