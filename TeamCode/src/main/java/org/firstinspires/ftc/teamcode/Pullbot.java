@@ -640,12 +640,10 @@ public class Pullbot extends GenericFTCRobot {
     // Gamepad mapping is similar to tank drive.
     if (currentOpMode.gamepad1.left_trigger > 0){
       // nudge left wheel forward a little
-      //moveMotor(leftDrive, NUDGE_SPEED, NUDGE_INCHES);
       leftDrive.setPower (-NUDGE_SPEED);
     }
     if (currentOpMode.gamepad1.right_trigger > 0){
       // nudge right wheel forward a little
-
       rightDrive.setPower(-NUDGE_SPEED);
     }
     if (currentOpMode.gamepad1.left_bumper){
@@ -674,5 +672,8 @@ public class Pullbot extends GenericFTCRobot {
     rightDrive.setPower(temperedControl(drive + turn));
   }
 
+  public void oneStickDrive () {
+    // Todo: implement as for 2016-2017 season.
+  }
   // Macros can go here. Most will be used in the opmodes.
 }

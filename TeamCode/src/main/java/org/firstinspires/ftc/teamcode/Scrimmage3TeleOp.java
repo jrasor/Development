@@ -40,6 +40,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -73,9 +74,12 @@ public class Scrimmage3TeleOp extends LinearOpMode {
     telemetry.addData("Initialization report", initReport);
     telemetry.update();
 
+    robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     while (!isStopRequested()) {
       //robot.simpleDrive();
       robot.tankDrive();
+      // //robot.oneStickDrive(); // todo: code this, as in 2016-2017 season
       robot.enableNudge();
 
       // check all the trackable targets to see which one (if any) is visible.
