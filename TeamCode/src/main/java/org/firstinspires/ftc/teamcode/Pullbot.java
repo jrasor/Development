@@ -660,19 +660,12 @@ public class Pullbot extends GenericFTCRobot {
     //  Tank drive with the two sticks.
     double leftCommand = currentOpMode.gamepad1.left_stick_y;
     double rightCommand = currentOpMode.gamepad1.right_stick_y;
-    leftDrive.setPower(temperedControl(leftCommand));
-    rightDrive.setPower(temperedControl(rightCommand));
+    leftDrive.setPower(Range.clip(temperedControl(leftCommand), -1.0, 1.0));
+    rightDrive.setPower(Range.clip(temperedControl(rightCommand), -1.0, 1.0));
   }
 
   public void simpleDrive() {
     //  Left stick for fore-and-aft, right one for turns.
-    /*
-    double drive = currentOpMode.gamepad1.left_stick_y;
-    double turn  = currentOpMode.gamepad1.right_stick_x/2.0;
-    leftDrive.setPower(temperedControl(drive - turn));
-    rightDrive.setPower(temperedControl(drive + turn));
-
-     */
     double drive = currentOpMode.gamepad1.left_stick_y;
     double turn = currentOpMode.gamepad1.right_stick_x;
     double driveCommand = temperedControl(drive);
@@ -680,7 +673,7 @@ public class Pullbot extends GenericFTCRobot {
     double turnCommand = temperedControl(turn);
     turnCommand = Range.clip(turnCommand, -1.0, 1.0);
     // Might have to wait until here to clip, maybe normalize.
-    leftDrive.setPower(temperedControl(drive - turn));
+    leftDrive.setPower(temperedControl(drive - turn)); // turn/2.0?
     rightDrive.setPower(temperedControl(drive + turn));
   }
 
