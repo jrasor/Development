@@ -640,12 +640,10 @@ public class Pullbot extends GenericFTCRobot {
     // Gamepad mapping is similar to tank drive.
     if (currentOpMode.gamepad1.left_trigger > 0){
       // nudge left wheel forward a little
-      //moveMotor(leftDrive, NUDGE_SPEED, NUDGE_INCHES);
       leftDrive.setPower (-NUDGE_SPEED);
     }
     if (currentOpMode.gamepad1.right_trigger > 0){
       // nudge right wheel forward a little
-
       rightDrive.setPower(-NUDGE_SPEED);
     }
     if (currentOpMode.gamepad1.left_bumper){
@@ -662,17 +660,25 @@ public class Pullbot extends GenericFTCRobot {
     //  Tank drive with the two sticks.
     double leftCommand = currentOpMode.gamepad1.left_stick_y;
     double rightCommand = currentOpMode.gamepad1.right_stick_y;
-    leftDrive.setPower(temperedControl(leftCommand));
-    rightDrive.setPower(temperedControl(rightCommand));
+    leftDrive.setPower(Range.clip(temperedControl(leftCommand), -1.0, 1.0));
+    rightDrive.setPower(Range.clip(temperedControl(rightCommand), -1.0, 1.0));
   }
 
   public void simpleDrive() {
     //  Left stick for fore-and-aft, right one for turns.
     double drive = currentOpMode.gamepad1.left_stick_y;
-    double turn  = currentOpMode.gamepad1.right_stick_x/2.0;
-    leftDrive.setPower(temperedControl(drive - turn));
+    double turn = currentOpMode.gamepad1.right_stick_x;
+    double driveCommand = temperedControl(drive);
+    driveCommand = Range.clip(driveCommand, -1.0, 1.0);
+    double turnCommand = temperedControl(turn);
+    turnCommand = Range.clip(turnCommand, -1.0, 1.0);
+    // Might have to wait until here to clip, maybe normalize.
+    leftDrive.setPower(temperedControl(drive - turn)); // turn/2.0?
     rightDrive.setPower(temperedControl(drive + turn));
   }
 
+  public void oneStickDrive () {
+    // Todo: implement as for 2016-2017 season.
+  }
   // Macros can go here. Most will be used in the opmodes.
 }
