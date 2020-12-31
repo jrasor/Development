@@ -66,7 +66,8 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
-import static org.firstinspires.ftc.teamcode.Pullbot.RingOrientationAnalysisPipeline.Stage.values;
+import static org.firstinspires.ftc.teamcode.Pullbot.RingOrientationAnalysisPipeline.RingStage.values;
+import static org.firstinspires.ftc.teamcode.Pullbot.WobblerOrientationAnalysisPipeline.WobblerStage.values;
 
 /**
  * This is NOT an opmode.
@@ -262,7 +263,7 @@ public class Pullbot extends GenericFTCRobot {
         new Size(6, 6));
     ArrayList<AnalyzedRing> internalRingList = new ArrayList<>();
     volatile ArrayList<AnalyzedRing> clientRingList = new ArrayList<>();
-    Stage[] stages = values();
+    RingStage[] stages = RingStage.values();
     //   Currently displayed stage buffer.
     int stageNum = 0;
 
@@ -364,7 +365,7 @@ public class Pullbot extends GenericFTCRobot {
 
     //   Pipeline processing stages. Different image buffers are available at
     //   each one.
-    enum Stage {
+    enum RingStage {
       FINAL,
       Cb,
       MASK,
@@ -403,7 +404,8 @@ public class Pullbot extends GenericFTCRobot {
     ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> internalWobblerList =
         new ArrayList<>();
     volatile ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> clientWobblerList = new ArrayList<>();
-    WobblerOrientationAnalysisPipeline.Stage[] stages = values();
+    WobblerOrientationAnalysisPipeline.WobblerStage[] stages =
+        WobblerStage.values();
     //   Currently displayed stage buffer.
     int stageNum = 0;
 
@@ -506,20 +508,21 @@ public class Pullbot extends GenericFTCRobot {
 
     //   Pipeline processing stages. Different image buffers are available at
     //   each one.
-    enum Stage {
+    enum WobblerStage {
       FINAL,
-      Cb,
+      Cr,
       MASK,
       MASK_NR,
       CONTOURS
     }
 
     static class AnalyzedWobbler {
-      double aspectRatio;
-      int top;
-      int left;
-      int height;
-      int width;
+      public static int width;
+      public static double aspectRatio;
+      public static int top;
+      public static int left;
+      public static int height;
+      //int width;
     }
   }
 
