@@ -241,7 +241,7 @@ public class Pullbot extends GenericFTCRobot {
 
   static class RingOrientationAnalysisPipeline extends OpenCvPipeline {
 
-    //   RGB colors.
+    //   Colors used to draw bounding rectangles.
     static final Scalar RED = new Scalar(255, 0, 0);
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final Scalar BLUE = new Scalar(0, 0, 255);
@@ -299,7 +299,7 @@ public class Pullbot extends GenericFTCRobot {
       ArrayList<MatOfPoint> contoursList = new ArrayList<>();
 
       // Convert the input image to YCrCb color space, then extract the Cb
-      // channel.
+      // channel. Is this the only color information used?
       Imgproc.cvtColor(input, cbMat, Imgproc.COLOR_RGB2YCrCb);
       Core.extractChannel(cbMat, cbMat, CB_CHAN_IDX);
 
@@ -383,14 +383,15 @@ public class Pullbot extends GenericFTCRobot {
   }
 
   static class WobblerOrientationAnalysisPipeline extends OpenCvPipeline {
-    //   RGB colors.
+
+    //   Colors used to draw bounding rectangles.
     static final Scalar RED = new Scalar(255, 0, 0);
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final Scalar BLUE = new Scalar(0, 0, 255);
     //    Threshold values.
-    static final int CB_CHAN_MASK_THRESHOLD = 110;
+    static final int CR_CHAN_MASK_THRESHOLD = 110;
     static final int CONTOUR_LINE_THICKNESS = 2;
-    static final int CB_CHAN_IDX = 2;
+    static final int CR_CHAN_IDX = 2;
     //    Our working image buffers.
     Mat crMat = new Mat();
     Mat thresholdMat = new Mat();
@@ -440,13 +441,14 @@ public class Pullbot extends GenericFTCRobot {
       // A list we'll be using to store the contours we find.
       ArrayList<MatOfPoint> contoursList = new ArrayList<>();
 
-      // Convert the input image to YCrCb color space, then extract the Cb
-      // channel.
+      // Convert the input image to YCrCb color space, then extract the Cr
+      // channel. We're looking for far from red, cyan. Wobblers are blue.
+      // Is this the only color information used?
       Imgproc.cvtColor(input, crMat, Imgproc.COLOR_RGB2YCrCb);
-      Core.extractChannel(crMat, crMat, CB_CHAN_IDX);
+      Core.extractChannel(crMat, crMat, CR_CHAN_IDX);
 
-      // Threshold the Cb channel to form a mask, then run some noise reduction.
-      Imgproc.threshold(crMat, thresholdMat, CB_CHAN_MASK_THRESHOLD, 255,
+      // Threshold the Cr channel to form a mask, then run some noise reduction.
+      Imgproc.threshold(crMat, thresholdMat, CR_CHAN_MASK_THRESHOLD, 255,
           Imgproc.THRESH_BINARY_INV);
       morphMask(thresholdMat, morphedThreshold);
 
