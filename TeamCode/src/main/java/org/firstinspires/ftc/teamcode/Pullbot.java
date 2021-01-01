@@ -110,7 +110,8 @@ public class Pullbot extends GenericFTCRobot {
 
   // Vision properties
   public OpenCvInternalCamera2 phoneCam;
-  public RingOrientationAnalysisPipeline pipeline;
+  public RingOrientationAnalysisPipeline ringPipeline;
+  public WobblerOrientationAnalysisPipeline wobblerPipeline;
   // Where the camera lens with respect to the robot.
   // On this robot class, it is centered (left to right), but forward of the
   // middle of the robot, and above ground level.
@@ -201,15 +202,16 @@ public class Pullbot extends GenericFTCRobot {
         OpenCvCameraFactory.getInstance().createInternalCamera2
             (OpenCvInternalCamera2.CameraDirection.BACK, cameraMonitorViewId);
 
-
     // Open async and start streaming inside opened callback
     phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
       @Override
       public void onOpened() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
 
-        pipeline = new RingOrientationAnalysisPipeline();
-        phoneCam.setPipeline(pipeline);
+        //ringPipeline = new RingOrientationAnalysisPipeline();
+        //phoneCam.setPipeline(ringPipeline);
+        wobblerPipeline = new WobblerOrientationAnalysisPipeline();
+        phoneCam.setPipeline(wobblerPipeline);
       }
     });
     //initializationReport += "Camera is set up. Pipeline ";
@@ -240,15 +242,14 @@ public class Pullbot extends GenericFTCRobot {
    */
 
   static class RingOrientationAnalysisPipeline extends OpenCvPipeline {
-
+    // Todo: do this for Blue Wobble Goal mast. A later Pullbot may be
+    //  able to look for one and grab it.
     //   Colors used to draw bounding rectangles.
     static final Scalar RED = new Scalar(255, 0, 0);
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final Scalar BLUE = new Scalar(0, 0, 255);
     //    Threshold values.
     static final int CB_CHAN_MASK_THRESHOLD = 110;
-    // Todo: find threshold for  Blue Wobble Goal mast. A later Pullbot may be
-    //  able to look for one and grab it.
     static final int CONTOUR_LINE_THICKNESS = 2;
     static final int CB_CHAN_IDX = 2;
     //    Our working image buffers.
@@ -301,7 +302,7 @@ public class Pullbot extends GenericFTCRobot {
       // Convert the input image to YCrCb color space, then extract the Cb
       // channel. Is this the only color information used?
       Imgproc.cvtColor(input, cbMat, Imgproc.COLOR_RGB2YCrCb);
-      Core.extractChannel(cbMat, cbMat, CB_CHAN_IDX);
+      Core.extractChannel(cbMat, cbMat, 2);
 
       // Threshold the Cb channel to form a mask, then run some noise reduction.
       Imgproc.threshold(cbMat, thresholdMat, CB_CHAN_MASK_THRESHOLD, 255,
@@ -444,10 +445,11 @@ public class Pullbot extends GenericFTCRobot {
       ArrayList<MatOfPoint> contoursList = new ArrayList<>();
 
       // Convert the input image to YCrCb color space, then extract the Cr
-      // channel. We're looking for far from red, cyan. Wobblers are blue.
+      // channel. We're looking for far from red; that's cyan. Wobblers are
+      // blue.
       // Is this the only color information used?
       Imgproc.cvtColor(input, crMat, Imgproc.COLOR_RGB2YCrCb);
-      Core.extractChannel(crMat, crMat, CR_CHAN_IDX);
+      Core.extractChannel(crMat, crMat, 1);
 
       // Threshold the Cr channel to form a mask, then run some noise reduction.
       Imgproc.threshold(crMat, thresholdMat, CR_CHAN_MASK_THRESHOLD, 255,
@@ -533,7 +535,7 @@ public class Pullbot extends GenericFTCRobot {
     int ringsDetected = 0;
 
     ArrayList<RingOrientationAnalysisPipeline.AnalyzedRing> rings =
-        pipeline.getDetectedRings();
+        ringPipeline.getDetectedRings();
     if (rings.isEmpty()) {
       // ringsDetected will be left at zero.
     } else {
@@ -549,6 +551,25 @@ public class Pullbot extends GenericFTCRobot {
     }
 
     return ringsDetected;
+  }
+
+  int CountWobblers (int viewID){
+    int wobblersDetected = 0;
+
+    ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> wobblers =
+        wobblerPipeline.getDetectedWobblers();
+    if (wobblers.isEmpty()) {
+      // ringsDetected will be left at zero.
+    } else {
+      for (WobblerOrientationAnalysisPipeline.AnalyzedWobbler wobbler :
+          wobblers) {
+        if (wobbler.height < 60 ) continue;
+        if (wobbler.aspectRatio > 1 && wobbler.aspectRatio <= 2) wobblersDetected = 4;
+        if (wobbler.aspectRatio > 2 && wobbler.aspectRatio <= 4) wobblersDetected = 1;
+      }
+    }
+
+    return wobblersDetected;
   }
 
   /*
