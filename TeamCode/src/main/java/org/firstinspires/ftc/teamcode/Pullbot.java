@@ -322,7 +322,8 @@ public class Pullbot extends GenericFTCRobot {
     }
 
     void morphMask(Mat input, Mat output) {
-      //   Noise reduction.
+      //   Noise reduction. Take off some of the raggedy border area, then
+      //   puff it back out. That will smooth the border area.
       Imgproc.erode(input, output, erodeElement);
       Imgproc.erode(output, output, erodeElement);
       Imgproc.dilate(output, output, dilateElement);
@@ -355,7 +356,8 @@ public class Pullbot extends GenericFTCRobot {
       if (isMaybeRing) {
         internalRingList.add(analyzedRing);
         // The angle OpenCV gives us can be ambiguous, so look at the shape of
-        // the rectangle to fix that.
+        // the rectangle to fix that. This angle is not used for Rings, but
+        // will be used for Wobblers.
         double rotRectAngle = rotatedRectFitToContour.angle;
         if (rotatedRectFitToContour.size.width < rotatedRectFitToContour.size.height) {
           rotRectAngle += 90;
@@ -452,8 +454,7 @@ public class Pullbot extends GenericFTCRobot {
           Imgproc.THRESH_BINARY_INV);
       morphMask(thresholdMat, morphedThreshold);
 
-      // Ok, now actually look for the contours! We only look for external
-      // contours.
+      // Ok, now actually look for the contours, just the external ones.
       Imgproc.findContours(morphedThreshold, contoursList, new Mat(),
           Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
