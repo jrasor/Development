@@ -455,6 +455,8 @@ public class Pullbot extends GenericFTCRobot {
       Core.extractChannel(input, cG, 1);
       Core.extractChannel(input, cB, 2);
        */
+
+      // Try to do this in the RGB color space.
       Mat colorMask = new Mat();
       int RtooDark = 0;
       int RtooBright = 32;
