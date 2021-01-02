@@ -448,13 +448,37 @@ public class Pullbot extends GenericFTCRobot {
       // channel. We're looking for far from red; that's cyan. Wobblers are
       // blue.
       // Is this the only color information used?
-      Imgproc.cvtColor(input, crMat, Imgproc.COLOR_RGB2YCrCb);
-      Core.extractChannel(crMat, crMat, 1);
+      // Is this the only color information used?
+      /*Mat cR = new Mat ();
+      Mat cG = new Mat ();
+      Mat cB = new Mat ();
+      Core.extractChannel (input, cR, 0);
+      Core.extractChannel(input, cG, 1);
+      Core.extractChannel(input, cB, 2);
+       */
+
+      // Try to do this in the RGB color space.
+      Mat colorMask = new Mat();
+      int RtooDark = 0;
+      int RtooBright = 32;
+      int GtooDark = 0;
+      int GtooBright = 32;
+      int BtooDark = 32;
+      int BtooBright = 255;
+      Core.inRange(input,
+          new Scalar (RtooDark, GtooDark, BtooDark),
+          new Scalar (RtooBright, GtooBright, BtooBright),
+          colorMask);
+      //Imgproc.cvtColor(input, crMat, Imgproc.COLOR_RGB2YCrCb);
+      //Core.extractChannel(crMat, crMat, 1);
 
       // Threshold the Cr channel to form a mask, then run some noise reduction.
-      Imgproc.threshold(crMat, thresholdMat, CR_CHAN_MASK_THRESHOLD, 255,
+      //Imgproc.threshold(crMat, thresholdMat, CR_CHAN_MASK_THRESHOLD, 255,
+      //    Imgproc.THRESH_BINARY_INV);
+      Imgproc.threshold(colorMask,thresholdMat, 120.0, 255,
           Imgproc.THRESH_BINARY_INV);
       morphMask(thresholdMat, morphedThreshold);
+
 
       // Ok, now actually look for the contours, just the external ones.
       Imgproc.findContours(morphedThreshold, contoursList, new Mat(),
