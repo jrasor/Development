@@ -67,7 +67,7 @@ import java.util.ArrayList;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 import static org.firstinspires.ftc.teamcode.Pullbot.RingOrientationAnalysisPipeline.RingStage.values;
-import static org.firstinspires.ftc.teamcode.Pullbot.WobblerOrientationAnalysisPipeline.WobblerStage.values;
+
 
 /**
  * This is NOT an opmode.
@@ -111,7 +111,6 @@ public class Pullbot extends GenericFTCRobot {
   // Vision properties
   public OpenCvInternalCamera2 phoneCam;
   public RingOrientationAnalysisPipeline ringPipeline;
-  public WobblerOrientationAnalysisPipeline wobblerPipeline;
   // Where the camera lens with respect to the robot.
   // On this robot class, it is centered (left to right), but forward of the
   // middle of the robot, and above ground level.
@@ -208,10 +207,8 @@ public class Pullbot extends GenericFTCRobot {
       public void onOpened() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
 
-        //ringPipeline = new RingOrientationAnalysisPipeline();
-        //phoneCam.setPipeline(ringPipeline);
-        wobblerPipeline = new WobblerOrientationAnalysisPipeline();
-        phoneCam.setPipeline(wobblerPipeline);
+        ringPipeline = new RingOrientationAnalysisPipeline();
+        phoneCam.setPipeline(ringPipeline);
       }
     });
     //initializationReport += "Camera is set up. Pipeline ";
@@ -284,7 +281,7 @@ public class Pullbot extends GenericFTCRobot {
       internalRingList.clear();
 
       //   Process the image.
-      for (MatOfPoint contour : findContours(input)) {
+      for (MatOfPoint contour : findRingContours(input)) {
         analyzeContour(contour, input);
       }
       clientRingList = new ArrayList<>(internalRingList);
@@ -295,31 +292,32 @@ public class Pullbot extends GenericFTCRobot {
       return clientRingList;
     }
 
-    ArrayList<MatOfPoint> findContours(Mat input) {
+    ArrayList<MatOfPoint> findRingContours(Mat input) {
       // A list we'll be using to store the contours we find.
-      ArrayList<MatOfPoint> contoursList = new ArrayList<>();
+      ArrayList<MatOfPoint> ringContoursList = new ArrayList<>();
 
       // Convert the input image to YCrCb color space, then extract the Cb
       // channel. Is this the only color information used?
       Imgproc.cvtColor(input, cbMat, Imgproc.COLOR_RGB2YCrCb);
       Core.extractChannel(cbMat, cbMat, 2);
 
-      // Threshold the Cb channel to form a mask, then run some noise reduction.
+      // Threshold the Cb channel to form a mask, invert it, then run some
+      // noise reduction.
       Imgproc.threshold(cbMat, thresholdMat, CB_CHAN_MASK_THRESHOLD, 255,
           Imgproc.THRESH_BINARY_INV);
       morphMask(thresholdMat, morphedThreshold);
 
       // Ok, now actually look for the contours! We only look for external
       // contours.
-      Imgproc.findContours(morphedThreshold, contoursList, new Mat(),
+      Imgproc.findContours(morphedThreshold, ringContoursList, new Mat(),
           Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
       // We do draw the contours we find, but not to the main input buffer.
       input.copyTo(contoursOnPlainImageMat);
-      Imgproc.drawContours(contoursOnPlainImageMat, contoursList, -1,
+      Imgproc.drawContours(contoursOnPlainImageMat, ringContoursList, -1,
           BLUE, CONTOUR_LINE_THICKNESS, 8);
 
-      return contoursList;
+      return ringContoursList;
     }
 
     void morphMask(Mat input, Mat output) {
@@ -385,175 +383,6 @@ public class Pullbot extends GenericFTCRobot {
     }
   }
 
-  static class WobblerOrientationAnalysisPipeline extends OpenCvPipeline {
-
-    //   Colors used to draw bounding rectangles.
-    static final Scalar RED = new Scalar(255, 0, 0);
-    static final Scalar GREEN = new Scalar(0, 255, 0);
-    static final Scalar BLUE = new Scalar(0, 0, 255);
-    //    Threshold values.
-    static final int CR_CHAN_MASK_THRESHOLD = 110;
-    static final int CONTOUR_LINE_THICKNESS = 2;
-    static final int CR_CHAN_IDX = 2;
-    //    Our working image buffers.
-    Mat crMat = new Mat();
-    Mat thresholdMat = new Mat();
-    Mat morphedThreshold = new Mat();
-    Mat contoursOnPlainImageMat = new Mat();
-    //   The elements we use for noise reduction.
-    Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
-        new Size(3, 3));
-    Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
-        new Size(6, 6));
-    ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> internalWobblerList =
-        new ArrayList<>();
-    volatile ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> clientWobblerList = new ArrayList<>();
-    WobblerOrientationAnalysisPipeline.WobblerStage[] stages =
-        WobblerStage.values();
-    //   Currently displayed stage buffer.
-    int stageNum = 0;
-
-    static void drawRotatedRect(RotatedRect rect, Mat drawOn) {
-      //   Draws a rotated rect by drawing each of the 4 lines individually.
-      Point[] points = new Point[4];
-      rect.points(points);
-
-      for (int i = 0; i < 4; ++i) {
-        Imgproc.line(drawOn, points[i], points[(i + 1) % 4], GREEN, 2);
-      }
-    }
-
-    @Override
-    public Mat processFrame(Mat input) {
-      // We'll be updating input with new data below.
-      internalWobblerList.clear();
-
-      //   Process the image.
-      for (MatOfPoint contour : findContours(input)) {
-        analyzeContour(contour, input);
-      }
-      clientWobblerList = new ArrayList<>(internalWobblerList);
-      return input;
-    }
-
-    public ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> getDetectedWobblers() {
-      return clientWobblerList;
-    }
-
-    ArrayList<MatOfPoint> findContours(Mat input) {
-      // A list we'll be using to store the contours we find.
-      ArrayList<MatOfPoint> contoursList = new ArrayList<>();
-
-      // Convert the input image to YCrCb color space, then extract the Cr
-      // channel. We're looking for far from red; that's cyan. Wobblers are
-      // blue.
-      // Is this the only color information used?
-      // Is this the only color information used?
-      /*Mat cR = new Mat ();
-      Mat cG = new Mat ();
-      Mat cB = new Mat ();
-      Core.extractChannel (input, cR, 0);
-      Core.extractChannel(input, cG, 1);
-      Core.extractChannel(input, cB, 2);
-       */
-
-      // Try to do this in the RGB color space.
-      Mat colorMask = new Mat();
-      int RtooDark = 0;
-      int RtooBright = 32;
-      int GtooDark = 0;
-      int GtooBright = 32;
-      int BtooDark = 32;
-      int BtooBright = 255;
-      Core.inRange(input,
-          new Scalar (RtooDark, GtooDark, BtooDark),
-          new Scalar (RtooBright, GtooBright, BtooBright),
-          colorMask);
-      //Imgproc.cvtColor(input, crMat, Imgproc.COLOR_RGB2YCrCb);
-      //Core.extractChannel(crMat, crMat, 1);
-
-      // Threshold the Cr channel to form a mask, then run some noise reduction.
-      //Imgproc.threshold(crMat, thresholdMat, CR_CHAN_MASK_THRESHOLD, 255,
-      //    Imgproc.THRESH_BINARY_INV);
-      Imgproc.threshold(colorMask,thresholdMat, 120.0, 255,
-          Imgproc.THRESH_BINARY_INV);
-      morphMask(thresholdMat, morphedThreshold);
-
-
-      // Ok, now actually look for the contours, just the external ones.
-      Imgproc.findContours(morphedThreshold, contoursList, new Mat(),
-          Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
-
-      // We do draw the contours we find, but not to the main input buffer.
-      input.copyTo(contoursOnPlainImageMat);
-      Imgproc.drawContours(contoursOnPlainImageMat, contoursList, -1,
-          BLUE, CONTOUR_LINE_THICKNESS, 8);
-
-      return contoursList;
-    }
-
-    void morphMask(Mat input, Mat output) {
-      //   Noise reduction.
-      Imgproc.erode(input, output, erodeElement);
-      Imgproc.erode(output, output, erodeElement);
-      Imgproc.dilate(output, output, dilateElement);
-      Imgproc.dilate(output, output, dilateElement);
-    }
-
-    void analyzeContour(MatOfPoint contour, Mat input) {
-      boolean isMaybeWobbler = true;
-      WobblerOrientationAnalysisPipeline.AnalyzedWobbler analyzedWobbler =
-          new WobblerOrientationAnalysisPipeline.AnalyzedWobbler();
-      //   Transform the contour to a different format.
-      Point[] points = contour.toArray();
-      MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
-
-      //   Do a rect fit to the contour, and draw it on the screen.
-      RotatedRect rotatedRectFitToContour =
-          Imgproc.minAreaRect(contour2f);
-      drawRotatedRect(rotatedRectFitToContour, input);
-      AnalyzedWobbler.width = (int) rotatedRectFitToContour.size.width;
-      AnalyzedWobbler.aspectRatio = rotatedRectFitToContour.size.width /
-          rotatedRectFitToContour.size.height;
-      AnalyzedWobbler.top = rotatedRectFitToContour.boundingRect().y;
-      AnalyzedWobbler.left = rotatedRectFitToContour.boundingRect().x;
-      AnalyzedWobbler.height = rotatedRectFitToContour.boundingRect().height;
-      //   Throw out "Wobblers" not in proper position.
-      if (AnalyzedWobbler.top < tooHigh) isMaybeWobbler = false;
-      if (AnalyzedWobbler.left > tooFarRight) isMaybeWobbler = false;
-      if (AnalyzedWobbler.width > tooWide) isMaybeWobbler = false;
-      if (AnalyzedWobbler.height > tooTall) isMaybeWobbler = false;
-      // TODO: consolidate these with filter code in CountWobblers.
-      if (isMaybeWobbler) {
-        internalWobblerList.add(analyzedWobbler);
-        // The angle OpenCV gives us can be ambiguous, so look at the shape of
-        // the rectangle to fix that.
-        double rotRectAngle = rotatedRectFitToContour.angle;
-        if (rotatedRectFitToContour.size.width < rotatedRectFitToContour.size.height) {
-          rotRectAngle += 90;
-        }
-      }
-    }
-
-    //   Pipeline processing stages. Different image buffers are available at
-    //   each one.
-    enum WobblerStage {
-      FINAL,
-      Cr,
-      MASK,
-      MASK_NR,
-      CONTOURS
-    }
-
-    static class AnalyzedWobbler {
-      public static int width;
-      public static double aspectRatio;
-      public static int top;
-      public static int left;
-      public static int height;
-      //int width;
-    }
-  }
 
   int CountRings (int viewID){
     int ringsDetected = 0;
@@ -577,24 +406,7 @@ public class Pullbot extends GenericFTCRobot {
     return ringsDetected;
   }
 
-  int CountWobblers (int viewID){
-    int wobblersDetected = 0;
 
-    ArrayList<WobblerOrientationAnalysisPipeline.AnalyzedWobbler> wobblers =
-        wobblerPipeline.getDetectedWobblers();
-    if (wobblers.isEmpty()) {
-      // ringsDetected will be left at zero.
-    } else {
-      for (WobblerOrientationAnalysisPipeline.AnalyzedWobbler wobbler :
-          wobblers) {
-        if (wobbler.height < 60 ) continue;
-        if (wobbler.aspectRatio > 1 && wobbler.aspectRatio <= 2) wobblersDetected = 4;
-        if (wobbler.aspectRatio > 2 && wobbler.aspectRatio <= 4) wobblersDetected = 1;
-      }
-    }
-
-    return wobblersDetected;
-  }
 
   /*
    *										Drive Train methods
