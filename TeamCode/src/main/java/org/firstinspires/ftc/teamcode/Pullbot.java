@@ -683,7 +683,35 @@ public class Pullbot extends GenericFTCRobot {
   }
 
   public void oneStickDrive () {
-    // Todo: implement as for 2016-2017 season.
+    double sumPower = 0.0;
+    double diffPower = 0.0;
+    double leftMotorPower = 0.0;
+    double rightMotorPower = 0.0;
+    double maxPower = 0.0;
+    final double MAX_POWER = 1.0;
+
+    // calculate sum and difference of motor powers.
+    sumPower = currentOpMode.gamepad1.left_stick_y; // forward stick is
+    // negative; we want
+    // power forward.
+    diffPower = -currentOpMode.gamepad1.left_stick_x; // left-right stick
+    // steers by
+    // running motors
+    // differently.
+
+    // calculate motor power as a linear combination of sum and difference.
+    leftMotorPower = (sumPower + diffPower) / 2;
+    rightMotorPower = (sumPower - diffPower) / 2;
+
+    // clip illegal power levels.
+    maxPower = Math.max(Math.abs(leftMotorPower), Math.abs(rightMotorPower));
+    maxPower = Math.min(maxPower, MAX_POWER);
+    //leftMotorPower /= maxPower;
+    //rightMotorPower /= maxPower;
+
+    // eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
+    leftDrive.setPower(leftMotorPower);
+    rightDrive.setPower(rightMotorPower);
   }
   // Macros can go here. Most will be used in the opmodes.
 }
