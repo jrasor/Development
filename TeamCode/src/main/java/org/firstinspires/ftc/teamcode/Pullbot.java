@@ -347,11 +347,11 @@ public class Pullbot extends GenericFTCRobot {
       analyzedRing.left = rotatedRectFitToContour.boundingRect().x;
       analyzedRing.height = rotatedRectFitToContour.boundingRect().height;
       //   Throw out "Rings" not in proper position.
+      // TODO: consolidate these with filter code in CountRings.
       if (analyzedRing.top < tooHigh) isMaybeRing = false;
       if (analyzedRing.left > tooFarRight) isMaybeRing = false;
       if (analyzedRing.width > tooWide) isMaybeRing = false;
       if (analyzedRing.height > tooTall) isMaybeRing = false;
-      // TODO: consolidate these with filter code in CountRings.
       if (isMaybeRing) {
         internalRingList.add(analyzedRing);
         // The angle OpenCV gives us can be ambiguous, so look at the shape of
@@ -394,6 +394,7 @@ public class Pullbot extends GenericFTCRobot {
     } else {
       for (RingOrientationAnalysisPipeline.AnalyzedRing ring :
           rings) {
+        // Todo: consolidate these with those in analyzeContour
         if (ring.left > 100) continue;
         if (ring.top < 0) continue;
         if (ring.width > 100) continue;
