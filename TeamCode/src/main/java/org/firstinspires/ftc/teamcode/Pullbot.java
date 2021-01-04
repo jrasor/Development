@@ -66,7 +66,6 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
-import static org.firstinspires.ftc.teamcode.Pullbot.RingOrientationAnalysisPipeline.RingStage.values;
 
 
 /**
@@ -121,7 +120,8 @@ public class Pullbot extends GenericFTCRobot {
   public static final float CAMERA_VERTICAL_DISPLACEMENT =
       8.0f * GenericFTCRobot.mmPerInch;   // eg:
   // Camera is 8 Inches above ground
-  public static final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera is ON the
+  public static final float CAMERA_LEFT_DISPLACEMENT = 0;     // eg: Camera
+  // is ON the
   // robot's center line
   public static boolean PHONE_IS_PORTRAIT = false;
   public int cameraMonitorViewId;
@@ -181,6 +181,7 @@ public class Pullbot extends GenericFTCRobot {
   public Pullbot() {
     super();
   }
+
   public Pullbot(LinearOpMode linearOpMode) {
     currentOpMode = linearOpMode;
   }
@@ -330,7 +331,6 @@ public class Pullbot extends GenericFTCRobot {
     }
 
     void analyzeContour(MatOfPoint contour, Mat input) {
-      boolean isMaybeRing = true;
       AnalyzedRing analyzedRing = new AnalyzedRing();
       //   Transform the contour to a different format.
       Point[] points = contour.toArray();
@@ -346,21 +346,13 @@ public class Pullbot extends GenericFTCRobot {
       analyzedRing.top = rotatedRectFitToContour.boundingRect().y;
       analyzedRing.left = rotatedRectFitToContour.boundingRect().x;
       analyzedRing.height = rotatedRectFitToContour.boundingRect().height;
-      //   Throw out "Rings" not in proper position.
-      // TODO: consolidate these with filter code in CountRings.
-      if (analyzedRing.top < tooHigh) isMaybeRing = false;
-      if (analyzedRing.left > tooFarRight) isMaybeRing = false;
-      if (analyzedRing.width > tooWide) isMaybeRing = false;
-      if (analyzedRing.height > tooTall) isMaybeRing = false;
-      if (isMaybeRing) {
-        internalRingList.add(analyzedRing);
-        // The angle OpenCV gives us can be ambiguous, so look at the shape of
-        // the rectangle to fix that. This angle is not used for Rings, but
-        // will be used for Wobblers.
-        double rotRectAngle = rotatedRectFitToContour.angle;
-        if (rotatedRectFitToContour.size.width < rotatedRectFitToContour.size.height) {
-          rotRectAngle += 90;
-        }
+      internalRingList.add(analyzedRing);
+      // The angle OpenCV gives us can be ambiguous, so look at the shape of
+      // the rectangle to fix that. This angle is not used for Rings, but
+      // will be used for Wobblers.
+      double rotRectAngle = rotatedRectFitToContour.angle;
+      if (rotatedRectFitToContour.size.width < rotatedRectFitToContour.size.height) {
+        rotRectAngle += 90;
       }
     }
 
@@ -384,7 +376,7 @@ public class Pullbot extends GenericFTCRobot {
   }
 
 
-  int CountRings (int viewID){
+  int CountRings(int viewID) {
     int ringsDetected = 0;
 
     ArrayList<RingOrientationAnalysisPipeline.AnalyzedRing> rings =
@@ -398,7 +390,7 @@ public class Pullbot extends GenericFTCRobot {
         if (ring.left > 100) continue;
         if (ring.top < 0) continue;
         if (ring.width > 100) continue;
-        if (ring.height > 60 ) continue;
+        if (ring.height > 60) continue;
         if (ring.aspectRatio > 1 && ring.aspectRatio <= 2) ringsDetected = 4;
         if (ring.aspectRatio > 2 && ring.aspectRatio <= 4) ringsDetected = 1;
       }
@@ -406,7 +398,6 @@ public class Pullbot extends GenericFTCRobot {
 
     return ringsDetected;
   }
-
 
 
   /*
@@ -417,7 +408,7 @@ public class Pullbot extends GenericFTCRobot {
 
   /*                      Primitive layer.                    */
   // Task layer methods are built up out of members at this layer.
-  private double temperedControl (double input) {
+  private double temperedControl(double input) {
     return Math.pow(input, 3.0);
   }
 
@@ -432,7 +423,7 @@ public class Pullbot extends GenericFTCRobot {
     rightDrive.setZeroPowerBehavior(someBehavior);
   }
 
-  public void moveMotor (DcMotor motor, double speed, double inches) {
+  public void moveMotor(DcMotor motor, double speed, double inches) {
     int newTarget;
 
     // Determine new target position, and pass to motor controller.
@@ -496,16 +487,16 @@ public class Pullbot extends GenericFTCRobot {
 
   // Sigmoid profile for change of speed on a single motor. Todo: test on two
   //  segments.
-  int changeSpeedSigmoid (double time2DoIt, double startSpeed, double endSpeed,
-                          DcMotor someMotor)
-  {
+  int changeSpeedSigmoid(double time2DoIt, double startSpeed, double endSpeed,
+                         DcMotor someMotor) {
     int Counts = 0;
     double time;
     double power;
     double powerScale = endSpeed - startSpeed;
     do {
       time = runtime.time();
-      power = startSpeed + powerScale * (0.5 - 0.5 * Math.cos(Math.PI * time / time2DoIt));
+      power =
+          startSpeed + powerScale * (0.5 - 0.5 * Math.cos(Math.PI * time / time2DoIt));
       someMotor.setPower(power);
     } while (time < time2DoIt);
     Counts = someMotor.getCurrentPosition();
@@ -569,8 +560,8 @@ public class Pullbot extends GenericFTCRobot {
     turnAngleRadiusDrive(speed, targetAngle, radius);
   }
 
-  public double turnArcRadiusSigmoid (double startSpeed, double endSpeed,
-                                      double arc, double radius){
+  public double turnArcRadiusSigmoid(double startSpeed, double endSpeed,
+                                     double arc, double radius) {
     double time;
     double speed;
     double leftSpeed, rightSpeed;
@@ -578,21 +569,23 @@ public class Pullbot extends GenericFTCRobot {
     double averageSpeed = (startSpeed + endSpeed) / 2.0;
     // Todo: What if radius is negative?
     double turnFudgeFactor =
-        (radius + DRIVE_WHEEL_SEPARATION/2.0) / radius;
+        (radius + DRIVE_WHEEL_SEPARATION / 2.0) / radius;
     double time2DoIt = arc / (averageSpeed * MAX_DRIVE_SPEED);
     runtime.reset();
     do {
       time = runtime.time();
-      speed = startSpeed + speedScale * (0.5 - 0.5 * Math.cos(Math.PI * time / time2DoIt));
+      speed =
+          startSpeed + speedScale * (0.5 - 0.5 * Math.cos(Math.PI * time / time2DoIt));
       leftSpeed = -speed / turnFudgeFactor;
       rightSpeed = -speed * turnFudgeFactor;
-      // Normalize speeds so greater is 1, and the lesser is scaled down by the lesser/greater ratio.
+      // Normalize speeds so greater is 1, and the lesser is scaled down by
+      // the lesser/greater ratio.
       if (Math.abs(leftSpeed) > 1.0) {
-        rightSpeed = rightSpeed/ Math.abs(leftSpeed);
+        rightSpeed = rightSpeed / Math.abs(leftSpeed);
         leftSpeed = Math.signum(leftSpeed); // was -1.0
       }
       if (Math.abs(rightSpeed) > 1.0) {
-        leftSpeed = leftSpeed/ Math.abs(rightSpeed);
+        leftSpeed = leftSpeed / Math.abs(rightSpeed);
         rightSpeed = Math.signum(rightSpeed); // was -1.0
       }
 
@@ -641,24 +634,24 @@ public class Pullbot extends GenericFTCRobot {
 
   /*                      Command layer.                    */
   // Human driver issues commands with gamepad.
-  public void enableNudge () {
+  public void enableNudge() {
 
     // Gamepad mapping is similar to tank drive.
-    if (currentOpMode.gamepad1.left_trigger > 0){
+    if (currentOpMode.gamepad1.left_trigger > 0) {
       // nudge left wheel forward a little
-      leftDrive.setPower (-NUDGE_SPEED);
+      leftDrive.setPower(-NUDGE_SPEED);
     }
-    if (currentOpMode.gamepad1.right_trigger > 0){
+    if (currentOpMode.gamepad1.right_trigger > 0) {
       // nudge right wheel forward a little
       rightDrive.setPower(-NUDGE_SPEED);
     }
-    if (currentOpMode.gamepad1.left_bumper){
+    if (currentOpMode.gamepad1.left_bumper) {
       // nudge left wheel back a little
-      leftDrive.setPower (NUDGE_SPEED);
+      leftDrive.setPower(NUDGE_SPEED);
     }
-    if (currentOpMode.gamepad1.right_bumper){
+    if (currentOpMode.gamepad1.right_bumper) {
       // nudge right wheel back a little
-      rightDrive.setPower (NUDGE_SPEED);
+      rightDrive.setPower(NUDGE_SPEED);
     }
   }
 
@@ -683,7 +676,7 @@ public class Pullbot extends GenericFTCRobot {
     rightDrive.setPower(temperedControl(drive + turn));
   }
 
-  public void oneStickDrive () {
+  public void oneStickDrive() {
     double sumPower = 0.0;
     double diffPower = 0.0;
     double leftMotorPower = 0.0;
@@ -710,7 +703,8 @@ public class Pullbot extends GenericFTCRobot {
     //leftMotorPower /= maxPower;
     //rightMotorPower /= maxPower;
 
-    // eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
+    // eg: Run wheels in tank mode (note: The joystick goes negative when
+    // pushed forwards)
     leftDrive.setPower(leftMotorPower);
     rightDrive.setPower(rightMotorPower);
   }
