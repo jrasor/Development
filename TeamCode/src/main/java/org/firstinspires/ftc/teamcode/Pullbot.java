@@ -250,31 +250,31 @@ public class Pullbot extends GenericFTCRobot {
     Mat cbMat = new Mat();  // A new buffer.
     Mat thresholdMat = new Mat(); // Accepted or rejected pixels.
     Mat morphedThreshold = new Mat(); // Buffer with smoothed edges.
-    //   How we smooth those edges.
-    Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
-        new Size(3, 3)); // remove pointy edge portions.
-    Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
-        new Size(6, 6)); // puff buffer out to replace erosion.
-
+    //   Buffers used in the smoothing process.
+    Mat erodedElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
+        new Size(3, 3));
+    Mat dilatedElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
+        new Size(6, 6));
     // Detected shapes pasted onto the processed image.
     Mat contoursOnPlainImageMat = new Mat();
 
+    // Lists of Ring candidates.
     ArrayList<AnalyzedRing> internalRingList = new ArrayList<>();
     volatile ArrayList<AnalyzedRing> clientRingList = new ArrayList<>();
     RingStage[] stages = RingStage.values();
-    //   Currently displayed stage buffer.
+    //   Currently displayed processing stage.
     int stageNum = 0;
 
     static void drawRotatedRect(RotatedRect rect, Mat drawOn) {
       //   Draws a rotated rect by drawing each of the 4 lines individually.
-      Point[] points = new Point[4];
+      Point[] points = new Point[4]; // corners.
       rect.points(points);
       for (int i = 0; i < 4; ++i) {
         Imgproc.line(drawOn, points[i], points[(i + 1) % 4], GREEN, 2);
       }
     }
 
-    @Override
+    @Override // Overrides method of OpenCVPipeline
     public Mat processFrame(Mat input) {
       // Look for shapes in the image buffer.
       internalRingList.clear();
@@ -292,26 +292,26 @@ public class Pullbot extends GenericFTCRobot {
     }
 
     ArrayList<MatOfPoint> findRingContours(Mat input) {
-      // Store the contours we find. For Rings, store rectangles.
+      // Set up the acceptable Ring colors.
       ArrayList<MatOfPoint> ringContoursList = new ArrayList<>();
 
       // Convert the input image to YCrCb color space, then extract the Cb
-      // channel. That looks for blue, no matter the lighting.
+      // channel. Cb looks for blue, no matter the lighting.
       Imgproc.cvtColor(input, cbMat, Imgproc.COLOR_RGB2YCrCb);
       Core.extractChannel(cbMat, cbMat, 2);
 
       // Threshold the Cb channel to form a mask and invert it.
       Imgproc.threshold(cbMat, thresholdMat, CB_CHAN_MASK_THRESHOLD, 255,
           Imgproc.THRESH_BINARY_INV); // inverted blue is yellow.
-      // Smooth the contour edges with noise reduction. The noise is those
-      // pointy, ragged portions of the contour edge.
+
+      // Smooth the mask edges.
       morphMask(thresholdMat, morphedThreshold);
 
-      // Now actually look for the contours.
+      // Look for the contours enclosing acceptable Ring colors.
       Imgproc.findContours(morphedThreshold, ringContoursList, new Mat(),
           Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
-      // We do draw the contours we find, but not to the main input buffer.
+      // Draw edges for the contours we find, but not to the main input buffer.
       input.copyTo(contoursOnPlainImageMat);
       Imgproc.drawContours(contoursOnPlainImageMat, ringContoursList, -1,
           BLUE, CONTOUR_LINE_THICKNESS, 8);
@@ -322,10 +322,10 @@ public class Pullbot extends GenericFTCRobot {
     void morphMask(Mat input, Mat output) {
       //   Noise reduction. Take off some of the raggedy border area, then
       //   puff it back out. That will smooth the border area.
-      Imgproc.erode(input, output, erodeElement); // double dose of each.
-      Imgproc.erode(output, output, erodeElement);
-      Imgproc.dilate(output, output, dilateElement);
-      Imgproc.dilate(output, output, dilateElement);
+      Imgproc.erode(input, output, erodedElement);
+      Imgproc.erode(output, output, erodedElement);
+      Imgproc.dilate(output, output, dilatedElement);
+      Imgproc.dilate(output, output, dilatedElement);
     }
 
     void analyzeContour(MatOfPoint contour, Mat input) {
