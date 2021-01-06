@@ -379,6 +379,7 @@ public class Pullbot extends GenericFTCRobot {
 
     ArrayList<RingOrientationAnalysisPipeline.AnalyzedRing> rings =
         ringPipeline.getDetectedRings();
+    // Todo: clean up the logic here.
     if (rings.isEmpty()) {
       // ringsDetected will be left at zero.
     } else {
