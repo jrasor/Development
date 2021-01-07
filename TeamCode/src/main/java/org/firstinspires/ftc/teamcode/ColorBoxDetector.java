@@ -39,15 +39,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -64,8 +58,6 @@ import org.openftc.easyopencv.OpenCvInternalCamera2;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
-
-import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 
 /**
@@ -87,7 +79,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
 
   // Vision properties
   public OpenCvInternalCamera2 phoneCam;
-  public RingOrientationAnalysisPipeline ringPipeline;
+  public BoxOrientationAnalysisPipeline boxPipeline;
   // Where the camera lens with respect to the robot.
   // On this robot class, it is centered (left to right), over the drive
   // wheel axis.
@@ -147,8 +139,8 @@ public class ColorBoxDetector extends GenericFTCRobot {
       @Override
       public void onOpened() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
-        ringPipeline = new RingOrientationAnalysisPipeline();
-        phoneCam.setPipeline(ringPipeline);
+        boxPipeline = new BoxOrientationAnalysisPipeline();
+        phoneCam.setPipeline(boxPipeline);
       }
     });
 
@@ -159,21 +151,18 @@ public class ColorBoxDetector extends GenericFTCRobot {
    *										Vision methods
    */
 
-  static class RingOrientationAnalysisPipeline extends OpenCvPipeline {
+  static class BoxOrientationAnalysisPipeline extends OpenCvPipeline {
     //    Colors used to draw bounding rectangles.
-    //    Todo: do this for Blue Wobble Goal mast. A later Pullbot may be
-    //    able to look for one and grab it.
     static final Scalar RED = new Scalar(255, 0, 0);
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final Scalar BLUE = new Scalar(0, 0, 255);
-    //    Threshold is how loosely or tightly to accept colors.
-    static final int CB_CHAN_MASK_THRESHOLD = 110;
+    static final Scalar LOWER_BOUND = new Scalar (16, 0, 128 );
+    static final Scalar UPPER_BOUND = new Scalar (255, 128, 255 );
     //    Marking rectangles or other detected shapes.
     static final int CONTOUR_LINE_THICKNESS = 2;
-    static final int CB_CHAN_IDX = 2;
     //    Buffers (matrices) hold image pixels for processing.
-    Mat cbMat = new Mat();  // A new buffer.
-    Mat thresholdMat = new Mat(); // Accepted or rejected pixels.
+    Mat coloredMat = new Mat();  // A new buffer.
+    Mat judgedMat = new Mat(); // Accepted or rejected pixels.
     Mat morphedThreshold = new Mat(); // Buffer with smoothed edges.
     //   Buffers used in the smoothing process.
     Mat erodedElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
@@ -183,10 +172,10 @@ public class ColorBoxDetector extends GenericFTCRobot {
     // Detected shapes pasted onto the processed image.
     Mat contoursOnPlainImageMat = new Mat();
 
-    // Lists of Ring candidates.
-    ArrayList<AnalyzedRing> internalRingList = new ArrayList<>();
-    volatile ArrayList<AnalyzedRing> clientRingList = new ArrayList<>();
-    RingStage[] stages = RingStage.values();
+    // Lists of rectangle candidates.
+    ArrayList<AnalyzedBox> internalBoxList = new ArrayList<>();
+    volatile ArrayList<AnalyzedBox> clientBoxList = new ArrayList<>();
+    BoxStage[] stages = BoxStage.values();
     //   Currently displayed processing stage.
     int stageNum = 0;
 
@@ -202,46 +191,38 @@ public class ColorBoxDetector extends GenericFTCRobot {
     @Override // Overrides method of OpenCVPipeline
     public Mat processFrame(Mat input) {
       // Look for shapes in the image buffer.
-      internalRingList.clear();
+      internalBoxList.clear();
 
       //   Look for edges separating accepted from rejected pixels.
-      for (MatOfPoint contour : findRingContours(input)) {
+      for (MatOfPoint contour : findBoxContours(input)) {
         analyzeContour(contour, input);
       }
-      clientRingList = new ArrayList<>(internalRingList);
+      clientBoxList = new ArrayList<>(internalBoxList);
       return input;
     }
 
-    public ArrayList<AnalyzedRing> getDetectedRings() {
-      return clientRingList;
+    public ArrayList<AnalyzedBox> getDetectedBoxes() {
+      return clientBoxList;
     }
 
-    ArrayList<MatOfPoint> findRingContours(Mat input) {
-      // Set up the acceptable Ring colors.
-      ArrayList<MatOfPoint> ringContoursList = new ArrayList<>();
-
-      // Convert the input image to YCrCb color space, then extract the Cb
-      // channel. Cb looks for blue, no matter the lighting.
-      Imgproc.cvtColor(input, cbMat, Imgproc.COLOR_RGB2YCrCb);
-      Core.extractChannel(cbMat, cbMat, 2);
-
-      // Threshold the Cb channel to form a mask and invert it.
-      Imgproc.threshold(cbMat, thresholdMat, CB_CHAN_MASK_THRESHOLD, 255,
-          Imgproc.THRESH_BINARY_INV); // inverted blue is yellow.
-
+    ArrayList<MatOfPoint> findBoxContours(Mat input) {
+      // Set up the acceptable rectangle colors.
+      ArrayList<MatOfPoint> boxContoursList = new ArrayList<>();
+      Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YCrCb);
+      Core.inRange(coloredMat, LOWER_BOUND, UPPER_BOUND, judgedMat);
       // Smooth the mask edges.
-      morphMask(thresholdMat, morphedThreshold);
+      morphMask(judgedMat, morphedThreshold);
 
       // Look for the contours enclosing acceptable Ring colors.
-      Imgproc.findContours(morphedThreshold, ringContoursList, new Mat(),
+      Imgproc.findContours(morphedThreshold, boxContoursList, new Mat(),
           Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
       // Draw edges for the contours we find, but not to the main input buffer.
       input.copyTo(contoursOnPlainImageMat);
-      Imgproc.drawContours(contoursOnPlainImageMat, ringContoursList, -1,
+      Imgproc.drawContours(contoursOnPlainImageMat, boxContoursList, -1,
           BLUE, CONTOUR_LINE_THICKNESS, 8);
 
-      return ringContoursList;
+      return boxContoursList;
     }
 
     void morphMask(Mat input, Mat output) {
@@ -254,7 +235,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
     }
 
     void analyzeContour(MatOfPoint contour, Mat input) {
-      AnalyzedRing analyzedRing = new AnalyzedRing();
+      AnalyzedBox analyzedRing = new AnalyzedBox();
       //   Transform the contour to a different format.
       Point[] points = contour.toArray();
       MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
@@ -269,7 +250,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
       analyzedRing.top = rotatedRectFitToContour.boundingRect().y;
       analyzedRing.left = rotatedRectFitToContour.boundingRect().x;
       analyzedRing.height = rotatedRectFitToContour.boundingRect().height;
-      internalRingList.add(analyzedRing);
+      internalBoxList.add(analyzedRing);
       // The angle OpenCV gives us can be ambiguous, so look at the shape of
       // the rectangle to fix that. This angle is not used for Rings, but
       // will be used for Wobblers.
@@ -281,7 +262,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
 
     //   Pipeline processing stages. Different image buffers are available at
     //   each one.
-    enum RingStage {
+    enum BoxStage {
       FINAL,
       Cb,
       MASK,
@@ -289,7 +270,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
       CONTOURS
     }
 
-    static class AnalyzedRing {
+    static class AnalyzedBox {
       double aspectRatio;
       int top;
       int left;
@@ -302,13 +283,13 @@ public class ColorBoxDetector extends GenericFTCRobot {
   int CountRings(int viewID) {
     int ringsDetected = 0;
 
-    ArrayList<RingOrientationAnalysisPipeline.AnalyzedRing> rings =
-        ringPipeline.getDetectedRings();
+    ArrayList<BoxOrientationAnalysisPipeline.AnalyzedBox> rings =
+        boxPipeline.getDetectedBoxes();
     // Todo: clean up the logic here.
     if (rings.isEmpty()) {
       // ringsDetected will be left at zero.
     } else {
-      for (RingOrientationAnalysisPipeline.AnalyzedRing ring :
+      for (BoxOrientationAnalysisPipeline.AnalyzedBox ring :
           rings) {
         // This rectangle is in the correct position. How many Rings are
         // stacked in it?
