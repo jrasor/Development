@@ -211,12 +211,10 @@ public class ColorBoxDetector extends GenericFTCRobot {
       final Scalar RGB_UPPER_BOUND = new Scalar (128, 128, 255);
       // Set up the acceptable rectangle colors.
       ArrayList<MatOfPoint> boxContoursList = new ArrayList<>();
+
       /* YCbCr color space. */
       Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YCrCb);
-      //Core.extractChannel(coloredMat, coloredMat, 2);
       Core.inRange(coloredMat, YCrCbLOWER_BOUND, YCrCbUPPER_BOUND, judgedMat);
-      //Imgproc.threshold(coloredMat, coloredMat, CB_CHAN_MASK_THRESHOLD, 255,
-      //    Imgproc.THRESH_BINARY_INV); // inverted blue is yellow.
 
       /* RGB color space. */
       //coloredMat = input;
