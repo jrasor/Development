@@ -156,8 +156,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
     static final Scalar RED = new Scalar(255, 0, 0);
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final Scalar BLUE = new Scalar(0, 0, 255);
-    static final Scalar LOWER_BOUND = new Scalar (16, 0, 128 );
-    static final Scalar UPPER_BOUND = new Scalar (255, 128, 255 );
+    static final int CB_CHAN_MASK_THRESHOLD = 55;
     //    Marking rectangles or other detected shapes.
     static final int CONTOUR_LINE_THICKNESS = 2;
     //    Buffers (matrices) hold image pixels for processing.
@@ -206,17 +205,28 @@ public class ColorBoxDetector extends GenericFTCRobot {
     }
 
     ArrayList<MatOfPoint> findBoxContours(Mat input) {
+      final Scalar YCrCbLOWER_BOUND = new Scalar (16, 0, 128);
+      final Scalar YCrCbUPPER_BOUND = new Scalar (160, 128, 255);
+      final Scalar RGB_LOWER_BOUND = new Scalar (0, 0, 64);
+      final Scalar RGB_UPPER_BOUND = new Scalar (128, 128, 255);
       // Set up the acceptable rectangle colors.
       ArrayList<MatOfPoint> boxContoursList = new ArrayList<>();
+      /* YCbCr color space. */
       Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YCrCb);
-      Core.inRange(coloredMat, LOWER_BOUND, UPPER_BOUND, judgedMat);
+      //Core.extractChannel(coloredMat, coloredMat, 2);
+      Core.inRange(coloredMat, YCrCbLOWER_BOUND, YCrCbUPPER_BOUND, judgedMat);
+      //Imgproc.threshold(coloredMat, coloredMat, CB_CHAN_MASK_THRESHOLD, 255,
+      //    Imgproc.THRESH_BINARY_INV); // inverted blue is yellow.
+
+      /* RGB color space. */
+      //coloredMat = input;
+      //Core.inRange(coloredMat, RGB_LOWER_BOUND, RGB_UPPER_BOUND, judgedMat);
+
       // Smooth the mask edges.
-      morphMask(judgedMat, morphedThreshold);
-
+      morphMask(judgedMat, judgedMat);
       // Look for the contours enclosing acceptable Ring colors.
-      Imgproc.findContours(morphedThreshold, boxContoursList, new Mat(),
+      Imgproc.findContours(judgedMat, boxContoursList, new Mat(),
           Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
-
       // Draw edges for the contours we find, but not to the main input buffer.
       input.copyTo(contoursOnPlainImageMat);
       Imgproc.drawContours(contoursOnPlainImageMat, boxContoursList, -1,
@@ -231,7 +241,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
       Imgproc.erode(input, output, erodedElement);
       Imgproc.erode(output, output, erodedElement);
       Imgproc.dilate(output, output, dilatedElement);
-      Imgproc.dilate(output, output, dilatedElement);
+      //Imgproc.dilate(output, output, dilatedElement);
     }
 
     void analyzeContour(MatOfPoint contour, Mat input) {
