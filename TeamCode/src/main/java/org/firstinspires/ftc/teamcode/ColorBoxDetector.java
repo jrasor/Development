@@ -205,8 +205,8 @@ public class ColorBoxDetector extends GenericFTCRobot {
     }
 
     ArrayList<MatOfPoint> findBoxContours(Mat input) {
-      final Scalar YCrCbLOWER_BOUND = new Scalar (16, 0, 128);
-      final Scalar YCrCbUPPER_BOUND = new Scalar (160, 128, 255);
+      final Scalar YCrCbLOWER_BOUND = new Scalar (12, 0, 96);
+      final Scalar YCrCbUPPER_BOUND = new Scalar (96, 128, 225);
       final Scalar RGB_LOWER_BOUND = new Scalar (0, 0, 64);
       final Scalar RGB_UPPER_BOUND = new Scalar (128, 128, 255);
       final Scalar HSV_LOWER_BOUND = new Scalar (220, 1.000, 0.251);
