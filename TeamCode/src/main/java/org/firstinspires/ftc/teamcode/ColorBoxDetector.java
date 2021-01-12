@@ -73,6 +73,8 @@ import java.util.ArrayList;
  * v 0.1    1/6/20 Copied and reduced from Pullbot. Only OpenCV properties will
  *          be kept. Finds Ultimate Goal Rings on camera preview.
  * v 0.11   Finds blue rectangles.
+ * v 0.2    Finds Wobbler vertical stalk, flat deck, and little else except
+ *          very dark objects.
  */
 
 public class ColorBoxDetector extends GenericFTCRobot {
@@ -121,7 +123,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
 
   public String init(HardwareMap someHWMap) {
     hwMap = someHWMap;
-    String initializationReport = "Pullbot initialization: ";
+    String initializationReport = "Camera initialization: ";
     // Initialize vision hardware.
 
     // Create camera instance
@@ -138,7 +140,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
     phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
       @Override
       public void onOpened() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
         boxPipeline = new BoxOrientationAnalysisPipeline();
         phoneCam.setPipeline(boxPipeline);
       }
