@@ -209,6 +209,8 @@ public class ColorBoxDetector extends GenericFTCRobot {
       final Scalar YCrCbUPPER_BOUND = new Scalar (160, 128, 255);
       final Scalar RGB_LOWER_BOUND = new Scalar (0, 0, 64);
       final Scalar RGB_UPPER_BOUND = new Scalar (128, 128, 255);
+      final Scalar HSV_LOWER_BOUND = new Scalar (220, 1.000, 0.251);
+      final Scalar HSV_UPPER_BOUND = new Scalar (250, 0.498, 1.000);
       // Set up the acceptable rectangle colors.
       ArrayList<MatOfPoint> boxContoursList = new ArrayList<>();
 
@@ -219,6 +221,10 @@ public class ColorBoxDetector extends GenericFTCRobot {
       /* RGB color space. */
       //coloredMat = input;
       //Core.inRange(coloredMat, RGB_LOWER_BOUND, RGB_UPPER_BOUND, judgedMat);
+
+      /* HSV color space. */
+      //Imgproc.cvtColor (input, coloredMat, Imgproc.COLOR_RGB2HSV);
+      //Core.inRange(coloredMat, HSV_LOWER_BOUND, HSV_UPPER_BOUND, judgedMat);
 
       // Smooth the mask edges.
       morphMask(judgedMat, judgedMat);
