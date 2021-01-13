@@ -224,12 +224,21 @@ public class ColorBoxDetector extends GenericFTCRobot {
       final Scalar RGB_UPPER_BOUND = new Scalar (128, 128, 255);
       final Scalar HSV_LOWER_BOUND = new Scalar (220, 1.000, 0.251);
       final Scalar HSV_UPPER_BOUND = new Scalar (250, 0.498, 1.000);
-      // Set up the acceptable rectangle colors.
+      final Scalar YUV_LOWER_BOUND = new Scalar (0.029, 0.110, -0.025);
+      final Scalar YUV_UPPER_BOUND = new Scalar (0.559, 0.218, -0.050);
+
+          // Set up the acceptable rectangle colors.
       ArrayList<MatOfPoint> boxContoursList = new ArrayList<>();
 
       /* YCrCb color space. */
       Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YCrCb);
       Core.inRange(coloredMat, YCrCbLOWER_BOUND, YCrCbUPPER_BOUND, judgedMat);
+
+      /* YCrCb color space. */
+      // Why do this?
+      //Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2BGR);
+      //Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_BGR2YCrCb);
+      //Core.inRange(coloredMat, HSV_LOWER_BOUND, HSV_UPPER_BOUND, judgedMat);
 
       /* RGB color space. */
       //coloredMat = input;
@@ -239,7 +248,11 @@ public class ColorBoxDetector extends GenericFTCRobot {
       //Imgproc.cvtColor (input, coloredMat, Imgproc.COLOR_RGB2HSV);
       //Core.inRange(coloredMat, HSV_LOWER_BOUND, HSV_UPPER_BOUND, judgedMat);
 
-      /* Other spaces, like YUV, may be set up here. */
+      /* YUV color space. */
+      //Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YUV);
+      //Core.inRange(coloredMat, YUV_LOWER_BOUND, YUV_UPPER_BOUND, judgedMat);
+
+      /* Other spaces, like BGR, may be set up here. */
 
       // Smooth the mask edges.
       morphMask(judgedMat, judgedMat);
