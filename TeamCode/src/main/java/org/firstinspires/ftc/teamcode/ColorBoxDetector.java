@@ -59,7 +59,6 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
-
 /**
  * This is NOT an opmode.
  * <p>
@@ -70,16 +69,20 @@ import java.util.ArrayList;
 
 /* Version history
  * ======= =======
- * v 0.1    1/6/20 Copied and reduced from Pullbot. Only OpenCV properties will
- *          be kept. Finds Ultimate Goal Rings on camera preview.
- * v 0.11   Finds blue rectangles.
- * v 0.2    Finds Wobbler vertical stalk, flat deck, and little else except
- *          very dark objects.
+ * v 0.1    12/22/20 Copied and reduced from Pullbot. Only OpenCV properties
+ *          will be kept. Finds Ultimate Goal Rings on camera preview.
+ * v 0.11   1/1/21Finds blue rectangles.
+ * v 0.2    1/8/21 Finds Wobbler vertical stalk, flat deck, and little else
+ *          except very dark objects.
+ * v 0.21   1/12/21 Improved Wobbler detection and cyan rejection. Using
+ *          YCrCb color space.
  */
 
 public class ColorBoxDetector extends GenericFTCRobot {
 
-  // Vision properties
+  /*
+   *										Vision properties
+   */
   public OpenCvInternalCamera2 phoneCam;
   public BoxOrientationAnalysisPipeline boxPipeline;
   // Where the camera lens with respect to the robot.
@@ -125,7 +128,6 @@ public class ColorBoxDetector extends GenericFTCRobot {
     hwMap = someHWMap;
     String initializationReport = "Camera initialization: ";
     // Initialize vision hardware.
-
     // Create camera instance
     cameraMonitorViewId =
         someHWMap.appContext.getResources().getIdentifier(
@@ -136,7 +138,9 @@ public class ColorBoxDetector extends GenericFTCRobot {
         OpenCvCameraFactory.getInstance().createInternalCamera2
             (OpenCvInternalCamera2.CameraDirection.BACK, cameraMonitorViewId);
 
-    // Open async and start streaming inside opened callback
+    // Open async and start streaming inside opened callback. The camera will
+    // just spit out frames as fast as it can, and any other process can grab
+    // the most recent and do something with it.
     phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
       @Override
       public void onOpened() {
@@ -159,6 +163,13 @@ public class ColorBoxDetector extends GenericFTCRobot {
     static final Scalar GREEN = new Scalar(0, 255, 0);
     static final Scalar BLUE = new Scalar(0, 0, 255);
     static final int CB_CHAN_MASK_THRESHOLD = 55;
+    static final int VIEWPORT_TOP = 0;
+    static final int VIEWPORT_BOTTOM = 240;
+    static final int VIEWPORT_HEIGHT = VIEWPORT_BOTTOM - VIEWPORT_TOP;
+    static final int VIEWPORT_LEFT = 0;
+    static final int VIEWPORT_RIGHT = 320;
+    static final int VIEWPORT_WIDTH = VIEWPORT_RIGHT - VIEWPORT_LEFT;
+    static final int TOO_HIGH = 120;
     //    Marking rectangles or other detected shapes.
     static final int CONTOUR_LINE_THICKNESS = 2;
     //    Buffers (matrices) hold image pixels for processing.
@@ -170,7 +181,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
         new Size(3, 3));
     Mat dilatedElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT,
         new Size(6, 6));
-    // Detected shapes pasted onto the processed image.
+    // Outline boxes for detected shapes pasted onto the processed image.
     Mat contoursOnPlainImageMat = new Mat();
 
     // Lists of rectangle candidates.
@@ -216,7 +227,7 @@ public class ColorBoxDetector extends GenericFTCRobot {
       // Set up the acceptable rectangle colors.
       ArrayList<MatOfPoint> boxContoursList = new ArrayList<>();
 
-      /* YCbCr color space. */
+      /* YCrCb color space. */
       Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YCrCb);
       Core.inRange(coloredMat, YCrCbLOWER_BOUND, YCrCbUPPER_BOUND, judgedMat);
 
@@ -228,9 +239,11 @@ public class ColorBoxDetector extends GenericFTCRobot {
       //Imgproc.cvtColor (input, coloredMat, Imgproc.COLOR_RGB2HSV);
       //Core.inRange(coloredMat, HSV_LOWER_BOUND, HSV_UPPER_BOUND, judgedMat);
 
+      /* Other spaces, like YUV, may be set up here. */
+
       // Smooth the mask edges.
       morphMask(judgedMat, judgedMat);
-      // Look for the contours enclosing acceptable Ring colors.
+      // Look for the contours enclosing acceptable Wobbler colors.
       Imgproc.findContours(judgedMat, boxContoursList, new Mat(),
           Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
       // Draw edges for the contours we find, but not to the main input buffer.
@@ -251,22 +264,23 @@ public class ColorBoxDetector extends GenericFTCRobot {
     }
 
     void analyzeContour(MatOfPoint contour, Mat input) {
-      AnalyzedBox analyzedRing = new AnalyzedBox();
+      AnalyzedBox analyzedBox = new AnalyzedBox();
       //   Transform the contour to a different format.
       Point[] points = contour.toArray();
       MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
 
-      //   Draw a rectangle that best fits the  contour.
+      //   Draw a rectangle that best fits the contour.
       RotatedRect rotatedRectFitToContour =
           Imgproc.minAreaRect(contour2f);
       drawRotatedRect(rotatedRectFitToContour, input);
-      analyzedRing.width = (int) rotatedRectFitToContour.size.width;
-      analyzedRing.aspectRatio = rotatedRectFitToContour.size.width /
+      analyzedBox.width = (int) rotatedRectFitToContour.size.width;
+      analyzedBox.aspectRatio = rotatedRectFitToContour.size.width /
           rotatedRectFitToContour.size.height;
-      analyzedRing.top = rotatedRectFitToContour.boundingRect().y;
-      analyzedRing.left = rotatedRectFitToContour.boundingRect().x;
-      analyzedRing.height = rotatedRectFitToContour.boundingRect().height;
-      internalBoxList.add(analyzedRing);
+      analyzedBox.top = rotatedRectFitToContour.boundingRect().y;
+      analyzedBox.left = rotatedRectFitToContour.boundingRect().x;
+      analyzedBox.height = rotatedRectFitToContour.boundingRect().height;
+      internalBoxList.add(analyzedBox);
+
       // The angle OpenCV gives us can be ambiguous, so look at the shape of
       // the rectangle to fix that. This angle is not used for Rings, but
       // will be used for Wobblers.
@@ -295,26 +309,29 @@ public class ColorBoxDetector extends GenericFTCRobot {
     }
   }
 
-  //    Use the detected rectangles to count Rings. Taller means more Rings.
-  int CountRings(int viewID) {
-    int ringsDetected = 0;
+  //    Use the detected rectangles to count Wobble Goals. This version is
+  //    copied over from CountRings method of Pullbot, and may be omitted
+  //    later. We're not interested in how many Wobblers are visible, but in
+  //    where the closest visible one is.
+  int CountWobblers(int viewID) {
+    int boxesDetected = 0;
 
-    ArrayList<BoxOrientationAnalysisPipeline.AnalyzedBox> rings =
+    ArrayList<BoxOrientationAnalysisPipeline.AnalyzedBox> boxes =
         boxPipeline.getDetectedBoxes();
     // Todo: clean up the logic here.
-    if (rings.isEmpty()) {
-      // ringsDetected will be left at zero.
+    if (boxes.isEmpty()) {
+      // boxesDetected will be left at zero.
     } else {
-      for (BoxOrientationAnalysisPipeline.AnalyzedBox ring :
-          rings) {
-        // This rectangle is in the correct position. How many Rings are
-        // stacked in it?
-        if (ring.aspectRatio > 1 && ring.aspectRatio <= 2) ringsDetected = 4;
-        if (ring.aspectRatio > 2 && ring.aspectRatio <= 4) ringsDetected = 1;
+      for (BoxOrientationAnalysisPipeline.AnalyzedBox box :
+          boxes) {
+        // This rectangle is in the correct position. Is that a Wobbler in
+        // there?
+        if (box.aspectRatio > 1 && box.aspectRatio <= 2) boxesDetected = 4;
+        if (box.aspectRatio > 2 && box.aspectRatio <= 4) boxesDetected = 1;
       }
     }
 
-    return ringsDetected;
+    return boxesDetected;
   }
 
 }
