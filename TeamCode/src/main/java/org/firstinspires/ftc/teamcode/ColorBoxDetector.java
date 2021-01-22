@@ -249,8 +249,8 @@ public class ColorBoxDetector extends GenericFTCRobot {
       //Core.inRange(coloredMat, HSV_LOWER_BOUND, HSV_UPPER_BOUND, judgedMat);
 
       /* YUV color space. */
-      //Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YUV);
-      //Core.inRange(coloredMat, YUV_LOWER_BOUND, YUV_UPPER_BOUND, judgedMat);
+      Imgproc.cvtColor(input, coloredMat, Imgproc.COLOR_RGB2YUV);
+      Core.inRange(coloredMat, YUV_LOWER_BOUND, YUV_UPPER_BOUND, judgedMat);
 
       /* Other spaces, like BGR, may be set up here. */
 
