@@ -54,14 +54,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  *
  */
 
-@TeleOp(name = "Operate Arm Sigmoid", group = "Actuators")
+@TeleOp(name = "Operate Arm Slow Buttons", group = "Actuators")
 //@Disabled
-public class OperateArmSigmoid extends LinearOpMode {
+public class OperateArmSlowButtonsAY extends LinearOpMode {
 
-  static final int    CYCLE_MS    =   10;    // period of each update cycle
   static final double STOWED      =  0.0;    // Retracted over robot body
   static final double DEPLOYED    =  0.8;    // Extended out over Field. 1.0 for HiTEKs.
   static final double HALFWAY     =  (DEPLOYED - STOWED)/2;
+  static final double ITSY_BITSY  = 0.0003;
 
   // Define class members
   Servo arm;
@@ -70,63 +70,48 @@ public class OperateArmSigmoid extends LinearOpMode {
   double targetPosition;
   double startingPosition;
   double maxPosition = DEPLOYED;
-  double maxPositionError = 0.01;
 
   @Override
   public void runOpMode() {
     //  Initialize servo and arm.
     arm = hardwareMap.get(Servo.class, "arm");
-//        arm.setPosition(STOWED);
-    arm.setPosition(STOWED);
+    arm.setPosition(HALFWAY);
+//    arm.setPosition(STOWED);
 //        Todo: see if this is of any use. arm.scaleRange(0,1.0);
     position = arm.getPosition();
     telemetry.addData("Arm starting at", "%5.2f", position);
     telemetry.update();
-    ElapsedTime runtime = new ElapsedTime();
-    double period               = 3.0;
+    //ElapsedTime runtime = new ElapsedTime();
+    //double period               = 3.0;
 
     // Wait for the start button
     waitForStart();
-    runtime.reset();
-    double time                     = 0.0;        // Time since test began.
+    //runtime.reset();
+    //double time                     = 0.0;        // Time since test began.
 
     //  Full scale for now.
     double positionScale = DEPLOYED - STOWED;
     while(opModeIsActive()){
+      position = arm.getPosition();
       if (gamepad1.a) {
-        runtime.reset();
-        minPosition = targetPosition = STOWED;
-        maxPosition = startingPosition = position = arm.getPosition();
-        positionScale = minPosition - maxPosition; // yes, negative.
+        if (position - ITSY_BITSY > STOWED) position -= ITSY_BITSY;
+        telemetry.addLine("A");
+        arm.setPosition(position);
       }
       if (gamepad1.y) {
-        runtime.reset();
-        maxPosition = targetPosition = DEPLOYED;
-        minPosition = startingPosition = position = arm.getPosition();
-        positionScale = maxPosition - minPosition;
-      }
-
-      // Display the current value
-      telemetry.addData("Time", "%5.3f", time);
-      telemetry.addData("Arm Position", "%5.2f", position);
-      telemetry.addData("Starting Position", "%5.2f", startingPosition);
-      telemetry.addData("Target Position", "%5.2f", targetPosition);
-      telemetry.addData(">", "Press Stop to end test." );
-
-      // update time and positions
-      time = runtime.time();
-      if (Math.abs (targetPosition - position) > maxPositionError) {
-        position = startingPosition + positionScale * (0.5 - 0.5 * Math.cos(Math.PI * time/period));
+        if (position + ITSY_BITSY < DEPLOYED) position += ITSY_BITSY;
+        telemetry.addLine("Y");
         arm.setPosition(position);
-        telemetry.addData ("", "Moving...");
       }
-      telemetry.update();
-      //sleep(CYCLE_MS);
-      //idle();
-    }
 
-    // Signal done;
-    telemetry.addData(">", "Done");
-    telemetry.update();
+      // Display the current position
+      //telemetry.addData("Time", "%5.3f", time);
+      telemetry.addData("Arm Position", "%5.2f", position);
+      //telemetry.addData("Starting Position", "%5.2f", startingPosition);
+      //telemetry.addData("Target Position", "%5.2f", targetPosition);
+      //telemetry.addData(">", "Press Stop to end test." );
+      telemetry.update();
+      sleep (1);
+    }
   }
 }
