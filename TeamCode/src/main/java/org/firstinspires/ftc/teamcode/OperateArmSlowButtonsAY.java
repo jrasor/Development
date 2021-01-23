@@ -38,19 +38,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * This OpMode operates a single servo arm forward and back, using the gamepad Y button
  * (DEPLOYed) the A button to go back (STOWed). The code is structured as a LinearOpMode.
  *
- * The motion follows a sigmoid angle vs time function over the interval (0, 1):
- *
- *        r (t) = 0.5 - 0.5 * cos (πt)
- *
- *  This function starts slowly from zero, builds up some speed until the halfway
- *  point is reached, then slows down to gently approach the endpoint.
- *
- *  The domain and range can be scaled. The initial position can be other than zero.
- *
- *  CYCLE_MS sets the update period for position and reports.
- *
- *  We assume an instance of the Servo class, configured with the name "arm" as is
- *  found on a Trainerbot.
+ * The arm will move as long as one of those buttons is pressed, and stop if
+ * they are left alone.
  *
  */
 
@@ -60,34 +49,22 @@ public class OperateArmSlowButtonsAY extends LinearOpMode {
 
   static final double STOWED      =  0.0;    // Retracted over robot body
   static final double DEPLOYED    =  0.8;    // Extended out over Field. 1.0 for HiTEKs.
-  static final double HALFWAY     =  (DEPLOYED - STOWED)/2;
   static final double ITSY_BITSY  = 0.0003;
 
   // Define class members
   Servo arm;
   double position;
-  double minPosition = STOWED;
-  double targetPosition;
-  double startingPosition;
-  double maxPosition = DEPLOYED;
 
   @Override
   public void runOpMode() {
     //  Initialize servo and arm.
     arm = hardwareMap.get(Servo.class, "arm");
-    arm.setPosition(HALFWAY);
-//    arm.setPosition(STOWED);
-//        Todo: see if this is of any use. arm.scaleRange(0,1.0);
+    arm.setPosition(STOWED);
     position = arm.getPosition();
     telemetry.addData("Arm starting at", "%5.2f", position);
     telemetry.update();
-    //ElapsedTime runtime = new ElapsedTime();
-    //double period               = 3.0;
 
-    // Wait for the start button
     waitForStart();
-    //runtime.reset();
-    //double time                     = 0.0;        // Time since test began.
 
     //  Full scale for now.
     double positionScale = DEPLOYED - STOWED;
@@ -104,12 +81,8 @@ public class OperateArmSlowButtonsAY extends LinearOpMode {
         arm.setPosition(position);
       }
 
-      // Display the current position
-      //telemetry.addData("Time", "%5.3f", time);
+      // Display the current position and active command.
       telemetry.addData("Arm Position", "%5.2f", position);
-      //telemetry.addData("Starting Position", "%5.2f", startingPosition);
-      //telemetry.addData("Target Position", "%5.2f", targetPosition);
-      //telemetry.addData(">", "Press Stop to end test." );
       telemetry.update();
       sleep (1);
     }
