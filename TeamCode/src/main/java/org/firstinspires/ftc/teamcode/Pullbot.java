@@ -42,6 +42,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -81,8 +82,11 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * <p>
  * Motor channel:  Left front  drive motor:        "motor0"
  * Motor channel:  Right front drive motor:        "motor1"
- * Servo channel:                                  "arm"
+ * Motor channel:  Flexes the arm elbow:            "arm"
  * Color sensor:                                   "colorSensor"
+ *
+ * Before INITializing, manually move the arm to its initial position: back
+ * over the robot, pointing down at 45°.
  */
 
 /* Version history
@@ -104,6 +108,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * v 3.3beta  12/26/20 Production candidate for Scrimmage 3, and cleanup of
  *            the 12/24 Pullbot mess.
  * v 3.3  1/4/21 Simplified Ring shape detection.
+ * v 3.4  1/26/21 Servo arm replaced with heavy, gear driven motor arm.
  */
 
 public class Pullbot extends GenericFTCRobot {
@@ -158,13 +163,16 @@ public class Pullbot extends GenericFTCRobot {
   static final double MAX_WHEEL_TURNS_PER_SECOND = MAX_MOTOR_RPM / 60; //2.15
   static final double MAX_DRIVE_SPEED =
       MAX_WHEEL_TURNS_PER_SECOND * DISTANCE_PER_TURN; // 23.64"/s
-
-  // Arm related properties
-  public final double DEPLOYED = 1.0;   // arm extended in front of the Pullbot
-  public final double STOWED = 0.0;     // arm retracted back over the Pullbot
   public DcMotorEx leftDrive = null;
   public DcMotorEx rightDrive = null;
-  public Servo arm = null;
+
+  // Arm related properties
+  public final double ARMSPEED = 0.5;
+  public final int DEPLOYED = 1917;   // arm extended in front of the Pullbot
+  public final int OVER_WALL = 1450;
+  public final int STOWED = 0;     // arm retracted back over the Pullbot
+
+  public DcMotorEx arm = null;
 
   // Pullbot specific sensor members.
   public ColorSensor colorSensor;
@@ -214,18 +222,20 @@ public class Pullbot extends GenericFTCRobot {
     // Define and initialize motors. Stop them.
     leftDrive = hwMap.get(DcMotorEx.class, "motor0");
     rightDrive = hwMap.get(DcMotorEx.class, "motor1");
+    arm = hwMap.get(DcMotorEx.class, "arm");
     leftDrive.setDirection(DcMotor.Direction.FORWARD);
     rightDrive.setDirection(DcMotor.Direction.REVERSE);
     leftDrive.setPower(0);
     rightDrive.setPower(0);
+    arm.setDirection(DcMotorSimple.Direction.FORWARD);
+    // Manually move arm to STOWED position, back over robot at 45°.
+    arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     // Set all motors to run without encoders.
     // May want to use RUN_USING_ENCODERS if encoders are installed.
     leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-    // Define and initialize installed servos.
-    arm = hwMap.get(Servo.class, "arm");
 
     return initializationReport;
   }
@@ -643,6 +653,30 @@ public class Pullbot extends GenericFTCRobot {
 
   /*                      Command layer.                    */
   // Human driver issues commands with gamepad.
+
+  public void enableArm () {
+    arm.setPower(0.0);
+    while (currentOpMode.gamepad1.dpad_down) {
+      // Move arm Down
+      //Stops  when we hit ground or deployed limit
+      if (arm.getCurrentPosition() >= DEPLOYED) {
+        arm.setPower(0.0);
+      } else {
+        arm.setPower(ARMSPEED);
+      }
+    }
+
+    while (currentOpMode.gamepad1.dpad_up) {
+      // Move arm up
+      //Stops  when we hit ground or deployed limit
+      if (arm.getCurrentPosition() <= STOWED) {
+        arm.setPower(0.0);
+      } else {
+        arm.setPower(-ARMSPEED);
+      }
+    }
+  }
+
   public void enableNudge() {
 
     // Gamepad mapping is similar to tank drive.

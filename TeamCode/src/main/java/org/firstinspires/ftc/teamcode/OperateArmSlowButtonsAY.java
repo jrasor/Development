@@ -49,7 +49,7 @@ public class OperateArmSlowButtonsAY extends LinearOpMode {
 
   static final double STOWED      =  0.0;    // Retracted over robot body
   static final double DEPLOYED    =  0.8;    // Extended out over Field. 1.0 for HiTEKs.
-  static final double ITSY_BITSY  = 0.0003;
+  static final double ITSY_BITSY  = 0.0004;
 
   // Define class members
   Servo arm;

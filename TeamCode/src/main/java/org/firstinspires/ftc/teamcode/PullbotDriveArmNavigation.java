@@ -378,11 +378,6 @@ public class PullbotDriveArmNavigation extends LinearOpMode {
       //robot.tankDrive();
       robot.simpleDrive();
 
-      // Use gamepad buttons to move arm up (Y) and down (A)
-      if (gamepad1.y)
-        robot.arm.setPosition(robot.DEPLOYED);
-      else if (gamepad1.a)
-        robot.arm.setPosition(robot.STOWED);
 
       //NormalizedRGBA colors = colorSensor.;
       telemetry.addData("Colors",
