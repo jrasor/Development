@@ -41,18 +41,17 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
-import static org.firstinspires.ftc.teamcode.OperateArmSlowButtonsAY.ITSY_BITSY;
 
 @TeleOp(name = "Scrimmage3 TeleOp", group = "Competition")
 //@Disabled
@@ -78,33 +77,14 @@ public class Scrimmage3TeleOp extends LinearOpMode {
     robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-    //robot.arm.setPosition(robot.STOWED);
-    //double armPosition; // should that be a robot property?
-    //armPosition = robot.arm.getPosition();
-
     waitForStart();
     while (opModeIsActive()) {
-      //robot.simpleDrive();
-      robot.tankDrive();
+      robot.simpleDrive();
+      //robot.tankDrive();
       //robot.oneStickDrive();
       robot.enableNudge();
       robot.enableArm();
 
-      /* Actuators operation. */
-      /*
-      // Arm handling moved to Pullbot.
-      double armPosition = robot.arm.getPosition();
-      if (gamepad1.a) {
-        if (armPosition - ITSY_BITSY > robot.STOWED) armPosition -= ITSY_BITSY;
-        telemetry.addLine("A");
-        robot.arm.setPosition(armPosition);
-      }
-      if (gamepad1.y) {
-        if (armPosition + ITSY_BITSY < robot.DEPLOYED) armPosition += ITSY_BITSY;
-        telemetry.addLine("Y");
-        robot.arm.setPosition(armPosition);
-      }
-*/
       // check all the trackable targets to see which one (if any) is visible.
       targetVisible = false;
       try {for (VuforiaTrackable trackable : navigator.allTrackables) {
@@ -125,16 +105,16 @@ public class Scrimmage3TeleOp extends LinearOpMode {
         stop();
       }
 
-      // Provide feedback as to where the robot is located (if we know).
+      // Report robot location if we know.
       if (targetVisible) {
-        // express position (translation) of robot in inches.
+        // Report position (translation) of robot in inches.
         VectorF translation = lastLocation.getTranslation();
         telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
             translation.get(0) / GenericFTCRobot.mmPerInch,
             translation.get(1) / GenericFTCRobot.mmPerInch,
             translation.get(2) / GenericFTCRobot.mmPerInch);
 
-        // express the rotation of the robot in degrees.
+        // Report the rotation of the robot in degrees.
         Orientation rotation = Orientation.getOrientation(lastLocation,
             EXTRINSIC, XYZ, DEGREES);
         telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, " +
