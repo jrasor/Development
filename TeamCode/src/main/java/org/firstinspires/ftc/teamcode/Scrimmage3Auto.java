@@ -54,12 +54,12 @@ public class Scrimmage3Auto extends LinearOpMode {
     //  Push Wobbler to Goal Zone C
     //robot.turnArcRadiusDrive (turnSpeed, 123.0, 157.0);
     //robot.turnArcRadiusDrive (turnSpeed, -46.0, 157.0);
-    robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 190.0);
-    robot.turnArcRadiusSigmoid(1.0, 1.0, 76.0, 190.0);
-    robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 190.0);
+    robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 185.0);
+    robot.turnArcRadiusSigmoid(1.0, 1.0, 78.0, 185.0);
+    robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 185.0);
     //  Back out to the Launch Line.
-    robot.turnArcRadiusSigmoid(0.0, -1.0, -20.0, 190.0);
-    robot.turnArcRadiusSigmoid(-1.0, 0.0, -20.0, 190.0);
+    robot.turnArcRadiusSigmoid(0.0, -1.0, -22.0, 185.0);
+    robot.turnArcRadiusSigmoid(-1.0, 0.0, -22.0, 185.0);
   }
 
   @Override
