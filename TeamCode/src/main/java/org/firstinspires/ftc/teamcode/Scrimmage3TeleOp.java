@@ -117,7 +117,7 @@ public class Scrimmage3TeleOp extends LinearOpMode {
       } else {
         telemetry.addData("Visible Target", "none");
       }
-
+      telemetry.addData("Encoder counts", robot.arm.getCurrentPosition());
       telemetry.update();
     }
   }
