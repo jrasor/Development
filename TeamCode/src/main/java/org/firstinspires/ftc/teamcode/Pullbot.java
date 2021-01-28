@@ -657,7 +657,6 @@ public class Pullbot extends GenericFTCRobot {
         arm.setPower(ARMSPEED);
       }
     }
-
     while (currentOpMode.gamepad1.dpad_down) {
       // Pull arm back over the robot.
       // Stops when fully retracted, even if commanded to keep coming.
@@ -666,6 +665,16 @@ public class Pullbot extends GenericFTCRobot {
       } else {
         arm.setPower(-ARMSPEED);
       }
+    }
+    while (currentOpMode.gamepad1.dpad_right) {
+      // Nudge robot right on axis.
+      leftDrive.setPower(-0.4*NUDGE_SPEED);
+      rightDrive.setPower(0.4*NUDGE_SPEED);
+    }
+    while (currentOpMode.gamepad1.dpad_left) {
+      // Nudge robot left on axis.
+      leftDrive.setPower(0.4*NUDGE_SPEED);
+      rightDrive.setPower(-0.4*NUDGE_SPEED);
     }
   }
 

@@ -73,10 +73,7 @@ public class Scrimmage3TeleOp extends LinearOpMode {
     telemetry.addData("Robot status", "initialized.");
     telemetry.addData("Initialization report", initReport);
     telemetry.update();
-
-    robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+    
     waitForStart();
     while (opModeIsActive()) {
       robot.simpleDrive();
@@ -109,25 +106,18 @@ public class Scrimmage3TeleOp extends LinearOpMode {
       if (targetVisible) {
         // Report position (translation) of robot in inches.
         VectorF translation = lastLocation.getTranslation();
-        telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+        telemetry.addData("Pos (in)", "{X, Y} = %6.1f, %6.1f",
             translation.get(0) / GenericFTCRobot.mmPerInch,
-            translation.get(1) / GenericFTCRobot.mmPerInch,
-            translation.get(2) / GenericFTCRobot.mmPerInch);
+            translation.get(1) / GenericFTCRobot.mmPerInch);
 
         // Report the rotation of the robot in degrees.
         Orientation rotation = Orientation.getOrientation(lastLocation,
             EXTRINSIC, XYZ, DEGREES);
-        telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, " +
-            "%.0f", rotation.firstAngle, rotation.secondAngle,
-            rotation.thirdAngle);
+        telemetry.addData("Heading", " %4.0f\u00B0", rotation.thirdAngle);
       } else {
         telemetry.addData("Visible Target", "none");
       }
 
-      telemetry.addData("Colors",
-          "Red %4d   Green %4d   Blue %4d",
-          robot.colorSensor.red(), robot.colorSensor.green(),
-          robot.colorSensor.blue());
       telemetry.update();
     }
   }
