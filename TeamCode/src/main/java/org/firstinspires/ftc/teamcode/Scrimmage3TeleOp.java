@@ -41,7 +41,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
@@ -56,7 +56,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 @TeleOp(name = "Scrimmage3 TeleOp", group = "Competition")
 //@Disabled
 public class Scrimmage3TeleOp extends LinearOpMode {
-
+  private ElapsedTime runtime = new ElapsedTime();
   private OpenGLMatrix lastLocation = null;
   private VuforiaLocalizer vuforia = null;
   private boolean targetVisible = false;
@@ -75,6 +75,7 @@ public class Scrimmage3TeleOp extends LinearOpMode {
     telemetry.update();
     
     waitForStart();
+    runtime.reset();
     while (opModeIsActive()) {
       robot.simpleDrive();
       //robot.tankDrive();
