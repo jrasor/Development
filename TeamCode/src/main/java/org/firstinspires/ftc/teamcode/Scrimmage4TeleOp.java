@@ -55,7 +55,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 @TeleOp(name = "Scrimmage3 TeleOp", group = "Competition")
 //@Disabled
-public class Scrimmage3TeleOp extends LinearOpMode {
+public class Scrimmage4TeleOp extends LinearOpMode {
   private ElapsedTime runtime = new ElapsedTime();
   private OpenGLMatrix lastLocation = null;
   private VuforiaLocalizer vuforia = null;

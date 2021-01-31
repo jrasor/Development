@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 @Autonomous(name = "Scrimmage 3 Auto", group = "Competition")
 //@Disabled
-public class Scrimmage3Auto extends LinearOpMode {
+public class Scrimmage4Auto extends LinearOpMode {
   Pullbot robot;
   double straightSpeed = 0.60;
   double turnSpeed = 0.30;

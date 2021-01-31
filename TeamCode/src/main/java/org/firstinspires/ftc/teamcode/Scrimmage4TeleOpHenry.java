@@ -50,7 +50,7 @@ import com.qualcomm.robotcore.util.Range;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Scrimmage3 TeleOp " +
     "Henry", group = "Competition")
 //@Disabled
-public class Scrimmage3TeleOpHenry extends LinearOpMode {
+public class Scrimmage4TeleOpHenry extends LinearOpMode {
 
   // Declare OpMode members.
   private ElapsedTime runtime = new ElapsedTime();
