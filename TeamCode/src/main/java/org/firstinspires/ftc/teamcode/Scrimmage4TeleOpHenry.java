@@ -47,7 +47,7 @@ import com.qualcomm.robotcore.util.Range;
  * Operation of arm and elbow, with end effector that can grab a Wobble Goal.
  */
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Scrimmage3 TeleOp " +
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Scrimmage4 TeleOp " +
     "Henry", group = "Competition")
 //@Disabled
 public class Scrimmage4TeleOpHenry extends LinearOpMode {
