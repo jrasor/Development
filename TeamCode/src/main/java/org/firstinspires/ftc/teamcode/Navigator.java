@@ -80,6 +80,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  *          code from Drive2XYHeading. That's the same code as used by
  *          Scrimmage3Teleop. Those two opmodes will eventually instantiate
  *          a Navigator. 12/29/20: used in Scrimmage3TeleOp and Drive2XYHeading.
+ *  v 0.3   2/07/21 Added Drive2XYHeading. Uses Vuforia to get from Hither to
+ *          Yon.
  */
 
 public class Navigator extends GenericFTCRobot {
