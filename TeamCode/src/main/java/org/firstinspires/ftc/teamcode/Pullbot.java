@@ -115,6 +115,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 public class Pullbot extends GenericFTCRobot {
 
   // Vision properties
+  public Navigator navigator = new Navigator();
   public OpenCvInternalCamera2 phoneCam;
   public RingOrientationAnalysisPipeline ringPipeline;
   // Where the camera lens with respect to the robot.
@@ -746,6 +747,23 @@ public class Pullbot extends GenericFTCRobot {
     // pushed forwards)
     leftDrive.setPower(leftMotorPower);
     rightDrive.setPower(rightMotorPower);
+  }
+
+  // Go to a specified location of the Field, arriving at a specified heading.
+  // It needs the current robot location updated in real time by Vuforia.
+  public void Drive2XYHeading (double targetX, double targetY,
+                               double targetHeading) {
+
+  }
+
+  // Like the allomorph above, but gets initial position as arguments. It
+  // will try to update it with the IMU until it gets firm data from Vuforia.
+  // Then it will use that as long as available. It will return to dead
+  // reckoning on loss of Vuforia data.
+  public void Drive2XYHeading (double targetX, double targetY,
+                               double targetHeading, double currentX,
+                               double currentY, double currentHeading) {
+
   }
   // Macros can go here. Most will be used in the opmodes.
 }
