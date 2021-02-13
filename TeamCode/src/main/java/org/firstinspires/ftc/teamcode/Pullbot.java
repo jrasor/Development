@@ -47,7 +47,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -65,6 +70,9 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 
@@ -753,6 +761,120 @@ public class Pullbot extends GenericFTCRobot {
   // It needs the current robot location updated in real time by Vuforia.
   public void Drive2XYHeading (double targetX, double targetY,
                                double targetHeading) {
+
+    OpenGLMatrix lastLocation = null;
+    //private VuforiaLocalizer vuforia = null;
+    boolean targetVisible = false;
+    float phoneXRotate = 0;
+    float phoneYRotate = 0;
+    float phoneZRotate = 0;
+
+    double yCorrection = -0.04;
+    double headingCorrection = 0.5;
+    final double STRAIGHT_SPEED = 0.6;
+    final double TURN_SPEED = 0.2;
+    final double MAX_CORRECTION = TURN_SPEED;
+    final double MIN_CORRECTION = -TURN_SPEED;
+    targetX = 74.0; // Aim for robot front to end up near the picture.
+    double currentX = 0;  // We'll refine this by Vuforia if target image is
+    // visible.
+    double errorX = currentX - targetX;
+    final double ERROR_X_TOLERANCE = 16.0;
+    // avoids large and unstable bearing changes on final approach.
+    targetY = 35.5; // Also so robot can be near the picture.
+    double currentY;
+    double errorY;
+    final double ERROR_Y_TOLERANCE = 1.0;
+    double targetHeadingDegrees = 0.0;
+    double targetHeadingRadians = targetHeadingDegrees * Math.PI / 180.0;
+    double currentHeadingDegrees;
+    double currentHeadingRadians;
+    double errorHeadingDegrees;
+    double errorHeadingRadians = 0.0;
+
+    double targetBearingRadians = 0.0;
+    double targetBearingDegrees = targetBearingRadians * 180 / Math.PI;
+    double currentBearingRadians;
+    double errorBearingRadians;
+    double currentBearingDegrees;
+    double errorBearingDegrees;
+
+    double correction = 0.0;
+
+      targetVisible = false;
+      for (VuforiaTrackable trackable : navigator.allTrackables) {
+        if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+          targetVisible = true;
+          OpenGLMatrix robotLocationTransform =
+              ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+          if (robotLocationTransform != null) {
+            lastLocation = robotLocationTransform;
+          }
+          break;
+        }
+      }
+
+      // Report robot location and heading (if we know).
+      if (targetVisible) {
+        VectorF translation = lastLocation.getTranslation();
+        Orientation rotation =
+            Orientation.getOrientation(lastLocation, EXTRINSIC,
+                XYZ, DEGREES);
+      } else {
+      }
+
+      // Report where the robot is located, if we can see a Vuforia image.
+      if (targetVisible && Math.abs(errorX) > ERROR_X_TOLERANCE) {
+
+        // Report position (translation) and position error of robot in inches.
+        VectorF translation = lastLocation.getTranslation();
+        currentX = translation.get(0) / GenericFTCRobot.mmPerInch;
+        currentY = translation.get(1) / GenericFTCRobot.mmPerInch;
+        errorX = currentX - targetX;
+        errorY = currentY - targetY;
+
+        // Report bearing and bearing error of target from robot.
+        currentBearingRadians = Math.atan2(-errorY, -errorX);
+        currentBearingDegrees = currentBearingRadians * 180.0 / Math.PI;
+        errorBearingRadians = currentBearingRadians - targetBearingRadians;
+        errorBearingDegrees = errorBearingRadians * 180.0 / Math.PI;
+
+        // Report robot heading in degrees, and error of that heading.
+        Orientation rotation =
+            Orientation.getOrientation(lastLocation, EXTRINSIC,
+                XYZ,
+                DEGREES);
+        currentHeadingDegrees = rotation.thirdAngle;
+        currentHeadingRadians = currentHeadingDegrees * Math.PI / 180.0;
+        errorHeadingDegrees = currentHeadingDegrees - targetHeadingDegrees;
+        errorBearingRadians = currentBearingRadians - targetBearingRadians;
+        errorHeadingRadians = errorHeadingDegrees * Math.PI / 180.0;
+
+        // find motor speed corrections.
+        correction =
+            yCorrection * errorY - headingCorrection * errorHeadingRadians;
+        correction = Math.min(Math.max(correction, MIN_CORRECTION),
+            MAX_CORRECTION);
+        // Todo: slow down when errorX gets small.
+
+        //  Apply those corrections to drive motors.
+        // This is a Pullbot, not a Pushbot.
+        leftDrive.setPower(-TURN_SPEED + correction);
+        rightDrive.setPower(-TURN_SPEED - correction);
+
+      } else if (!targetVisible) {
+        leftDrive.setPower(0.0);
+        rightDrive.setPower(0.0);
+        // Todo: try to recover from this by turning on axis, guessing
+        //  from last known position.
+      } else {
+
+        // Clean up residual heading error.
+        turnAngle(TURN_SPEED, -errorHeadingRadians);
+        leftDrive.setPower(0.0);
+        rightDrive.setPower(0.0);
+        currentOpMode.stop();
+      }
 
   }
 

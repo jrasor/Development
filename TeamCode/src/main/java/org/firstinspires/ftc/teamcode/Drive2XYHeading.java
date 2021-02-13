@@ -103,7 +103,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * is explained below.
  */
 
-@TeleOp(name = "Vuforia assisted drive somewhere", group = "Concept")
+@TeleOp(name = "Drive to X, Y, Heading", group = "Concept")
 //@Disabled
 public class Drive2XYHeading extends LinearOpMode {
 

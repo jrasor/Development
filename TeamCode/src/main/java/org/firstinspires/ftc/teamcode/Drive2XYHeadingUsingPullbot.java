@@ -53,9 +53,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGR
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@TeleOp(name = "Scrimmage 4 TeleOp", group = "Competition")
+@TeleOp(name = "Drive to X, Y, Heading using Pullbot", group = "Concept")
 //@Disabled
-public class Scrimmage4TeleOp extends LinearOpMode {
+public class Drive2XYHeadingUsingPullbot extends LinearOpMode {
   private ElapsedTime runtime = new ElapsedTime();
   private OpenGLMatrix lastLocation = null;
   private VuforiaLocalizer vuforia = null;
@@ -73,16 +73,12 @@ public class Scrimmage4TeleOp extends LinearOpMode {
     telemetry.addData("Robot status", "initialized.");
     telemetry.addData("Initialization report", initReport);
     telemetry.update();
-    
+
     waitForStart();
     runtime.reset();
     while (opModeIsActive()) {
       robot.simpleDrive();
-      //robot.tankDrive();
-      //robot.oneStickDrive();
-      robot.enableNudge();
-      robot.enableArm();
-
+/*
       // check all the trackable targets to see which one (if any) is visible.
       targetVisible = false;
       try {for (VuforiaTrackable trackable : navigator.allTrackables) {
@@ -115,12 +111,14 @@ public class Scrimmage4TeleOp extends LinearOpMode {
         Orientation rotation = Orientation.getOrientation(lastLocation,
             EXTRINSIC, XYZ, DEGREES);
         telemetry.addData("Heading", " %4.0f\u00B0", rotation.thirdAngle);
+        robot.Drive2XYHeading(74.0, 35.0, 0.0);
       } else {
         telemetry.addData("Visible Target", "none");
       }
-      telemetry.addData("Encoder counts", robot.arm.getCurrentPosition());
       telemetry.update();
-      //if (gamepad1.x)robot.Drive2XYHeading(74.0, 35.0, 0.0);
+
+ */
     }
+    robot.Drive2XYHeading(74.0, 35.0, 0.0);
   }
 }
