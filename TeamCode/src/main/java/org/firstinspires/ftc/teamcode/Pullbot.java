@@ -357,13 +357,6 @@ public class Pullbot extends GenericFTCRobot {
       analyzedRing.left = rotatedRectFitToContour.boundingRect().x;
       analyzedRing.height = rotatedRectFitToContour.boundingRect().height;
       internalRingList.add(analyzedRing);
-      // The angle OpenCV gives us can be ambiguous, so look at the shape of
-      // the rectangle to fix that. This angle is not used for Rings, but
-      // will be used for Wobblers.
-      double rotRectAngle = rotatedRectFitToContour.angle;
-      if (rotatedRectFitToContour.size.width < rotatedRectFitToContour.size.height) {
-        rotRectAngle += 90;
-      }
     }
 
     //   Pipeline processing stages. Different image buffers are available at
