@@ -76,8 +76,9 @@ public class Drive2XYHeadingUsingPullbot extends LinearOpMode {
 
     waitForStart();
     runtime.reset();
-    while (opModeIsActive()) {
+    while (!isStopRequested()) {
       robot.simpleDrive();
+      robot.enableNudge();
 /*
       // check all the trackable targets to see which one (if any) is visible.
       targetVisible = false;
@@ -118,7 +119,11 @@ public class Drive2XYHeadingUsingPullbot extends LinearOpMode {
       telemetry.update();
 
  */
+      telemetry.addLine("Running...");
+      telemetry.update();
     }
-    robot.Drive2XYHeading(74.0, 35.0, 0.0);
+    telemetry.addData ("Final report", robot.Drive2XYHeading (74.0, 35.0, 0.0));
+    telemetry.update();
+    sleep (2000);
   }
 }

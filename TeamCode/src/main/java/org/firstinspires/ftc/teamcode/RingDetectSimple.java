@@ -44,9 +44,11 @@ public class RingDetectSimple extends LinearOpMode {
     waitForStart();
 
     while (opModeIsActive()) {
+      robot.simpleDrive();
+      robot.enableNudge();
       int ringsDetected = robot.CountRings(robot.cameraMonitorViewId);
       telemetry.addLine(String.format(Locale.US,
-          "Rings detected = %2d.",
+          "%2d Rings detected.",
           ringsDetected));
       telemetry.update();
     }

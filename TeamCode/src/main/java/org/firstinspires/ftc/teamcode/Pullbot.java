@@ -70,6 +70,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
@@ -172,7 +173,7 @@ public class Pullbot extends GenericFTCRobot {
   public DcMotorEx rightDrive = null;
 
   // Arm related properties
-  public final double ARMSPEED = 0.5;
+  public final double ARMSPEED = 1.0; // was 0.5
   public final int DEPLOYED = 1917;   // arm extended in front of the Pullbot
   public final int OVER_WALL = 1450;
   public final int STOWED = 0;     // arm retracted back over the Pullbot
@@ -196,7 +197,7 @@ public class Pullbot extends GenericFTCRobot {
     currentOpMode = linearOpMode;
   }
 
-  public String init(HardwareMap someHWMap) {
+  public String init (HardwareMap someHWMap) {
     hwMap = someHWMap;
     String initializationReport = "Pullbot initialization: ";
     // Initialize vision hardware.
@@ -759,9 +760,10 @@ public class Pullbot extends GenericFTCRobot {
 
   // Go to a specified location of the Field, arriving at a specified heading.
   // It needs the current robot location updated in real time by Vuforia.
-  public void Drive2XYHeading (double targetX, double targetY,
+  public String Drive2XYHeading (double targetX, double targetY,
                                double targetHeading) {
-
+    String reportString = "";
+    String runningCommentary = "";
     OpenGLMatrix lastLocation = null;
     //private VuforiaLocalizer vuforia = null;
     boolean targetVisible = false;
@@ -775,13 +777,13 @@ public class Pullbot extends GenericFTCRobot {
     final double TURN_SPEED = 0.2;
     final double MAX_CORRECTION = TURN_SPEED;
     final double MIN_CORRECTION = -TURN_SPEED;
-    targetX = 74.0; // Aim for robot front to end up near the picture.
+    //targetX = 74.0; // Aim for robot front to end up near the picture.
     double currentX = 0;  // We'll refine this by Vuforia if target image is
     // visible.
     double errorX = currentX - targetX;
     final double ERROR_X_TOLERANCE = 16.0;
     // avoids large and unstable bearing changes on final approach.
-    targetY = 35.5; // Also so robot can be near the picture.
+    //targetY = 35.5; // Also so robot can be near the picture.
     double currentY;
     double errorY;
     final double ERROR_Y_TOLERANCE = 1.0;
@@ -805,6 +807,9 @@ public class Pullbot extends GenericFTCRobot {
       for (VuforiaTrackable trackable : navigator.allTrackables) {
         if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
           targetVisible = true;
+          runningCommentary += "Found " + trackable.getName();
+          telemetry.addLine (runningCommentary);
+          telemetry.update();
           OpenGLMatrix robotLocationTransform =
               ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
           if (robotLocationTransform != null) {
@@ -816,6 +821,7 @@ public class Pullbot extends GenericFTCRobot {
 
       // Report robot location and heading (if we know).
       if (targetVisible) {
+        //reportString +=
         VectorF translation = lastLocation.getTranslation();
         Orientation rotation =
             Orientation.getOrientation(lastLocation, EXTRINSIC,
@@ -875,7 +881,7 @@ public class Pullbot extends GenericFTCRobot {
         rightDrive.setPower(0.0);
         currentOpMode.stop();
       }
-
+    return reportString;
   }
 
   // Like the allomorph above, but gets initial position as arguments. It

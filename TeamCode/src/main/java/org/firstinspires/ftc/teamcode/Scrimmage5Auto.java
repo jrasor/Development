@@ -33,9 +33,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  * o 4 Ring case: Go for Zone C.
  */
 
-@Autonomous(name = "Scrimmage 4 Auto", group = "Competition")
+@Autonomous(name = "Scrimmage 5 Auto", group = "Competition")
 //@Disabled
-public class Scrimmage4Auto extends LinearOpMode {
+public class Scrimmage5Auto extends LinearOpMode {
   Pullbot robot;
   double straightSpeed = 0.60;
   double turnSpeed = 0.30;
@@ -106,6 +106,6 @@ public class Scrimmage4Auto extends LinearOpMode {
         telemetry.update();
     }
     telemetry.update();
-    sleep (2000);
+    // deploy claw here
   }
 }

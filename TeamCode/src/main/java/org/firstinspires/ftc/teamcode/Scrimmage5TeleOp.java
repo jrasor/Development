@@ -53,9 +53,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGR
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-@TeleOp(name = "Scrimmage 4 TeleOp", group = "Competition")
+@TeleOp(name = "Scrimmage 5 TeleOp", group = "Competition")
 //@Disabled
-public class Scrimmage4TeleOp extends LinearOpMode {
+public class Scrimmage5TeleOp extends LinearOpMode {
   private ElapsedTime runtime = new ElapsedTime();
   private OpenGLMatrix lastLocation = null;
   private VuforiaLocalizer vuforia = null;
@@ -73,7 +73,10 @@ public class Scrimmage4TeleOp extends LinearOpMode {
     telemetry.addData("Robot status", "initialized.");
     telemetry.addData("Initialization report", initReport);
     telemetry.update();
-    
+
+    robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     waitForStart();
     runtime.reset();
     while (opModeIsActive()) {
