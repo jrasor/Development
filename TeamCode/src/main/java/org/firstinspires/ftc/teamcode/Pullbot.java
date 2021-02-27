@@ -173,7 +173,7 @@ public class Pullbot extends GenericFTCRobot {
   public DcMotorEx rightDrive = null;
 
   // Arm related properties
-  public final double ARMSPEED = 1.0; // was 0.5
+  public final double ARMSPEED = 0.7; // was 0.5
   public final int DEPLOYED = 1917;   // arm extended in front of the Pullbot
   public final int OVER_WALL = 1450;
   public final int STOWED = 0;     // arm retracted back over the Pullbot
@@ -235,6 +235,7 @@ public class Pullbot extends GenericFTCRobot {
     // Manually move arm to STOWED position, back over robot at 45°.
     arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
     leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
