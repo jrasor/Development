@@ -521,60 +521,13 @@ public class Pullbot extends GenericFTCRobot {
   // These methods are built up out of primitive layer methods. Opmodes are
   // built up out of methods at this layer.
 
-  //  This one requires no command layer to hardware layer translation.
-  //  Just continue going straight.
-  public void continueStraight(double speed) {
-    leftDrive.setPower(speed);
-    rightDrive.setPower(speed);
-  }
-
+  /*  Straight movements. All distances are in inches. */
   //   Simple wrapper for encoderDrive. Just go straight a number of inches.
   public void driveStraight(double speed, double inches) {
     encoderDrive(speed, speed, inches, inches);
   }
 
-  //   Turn on axis, as though with left and right tank drive joysticks in
-  //   equal but opposite deflection.
-  public void turnAngle(double speed, double angle) { // angle in radians
-    double inches = angle * DRIVE_WHEEL_SEPARATION / 2;
-    encoderDrive(speed, speed, -inches, inches);
-  }
-
-  /*  Turning movements. All angles are in radians. */
-  //  Turn at speed through an angle, with a given radius.
-  public void turnAngleRadiusDrive(double speed, double angle,
-                                   double radius) {
-
-    // One or both turning arcs could be negative.
-    // Degenerate cases: angle = 0, R = 0, R = d/2, R = +infinity (straight
-    // drive).
-    // Calculate 2 target distances, 2 speeds. Then feed 'em to encoderDrive.
-    // Arc lengths are angle * radius adjusted for the drive wheels: one
-    // shorter, the other longer. Speeds need to be adjusted as well.
-    // TODO: handle 4 quadrant cases: forward CW, forward CCW, back CW,
-    //  back CCW
-    // ** Note negative angle enforces backward movement. What would
-    // negative angle and negative radius do?
-    double leftRadius = radius - DRIVE_WHEEL_SEPARATION / 2.0;
-    double rightRadius = radius + DRIVE_WHEEL_SEPARATION / 2.0;
-    double turnAdjustLeft = leftRadius / radius;
-    double turnAdjustRight = rightRadius / radius;
-    double leftArc = leftRadius * angle;
-    double rightArc = rightRadius * angle;
-    double leftSpeed = speed * turnAdjustLeft;
-    double rightSpeed = speed * turnAdjustRight;
-
-    encoderDrive(leftSpeed, rightSpeed, leftArc, rightArc);
-  }
-
-  //    Wrapper for turnAngleRadius
-  // TODO make this a wrapper for encoderDrive instead.
-  public void turnArcRadiusDrive(double speed, double arc, double radius) {
-    double targetAngle = arc / radius;
-    turnAngleRadiusDrive(speed, targetAngle, radius);
-  }
-
-  public int DriveDistanceFast (double distance) {
+  public int DriveDistanceFastSigmoid (double distance) {
     // Motors must RUN_USING_ENCODER.
     // Start both motors at rest
     // Error condition: distance > MAX_DRIVE_SPEED. If not, no room for middle
@@ -615,6 +568,47 @@ public class Pullbot extends GenericFTCRobot {
     return time;
   }
 
+  /*  Turning movements. All angles are in radians. */
+  //   Turn on axis, as though with left and right tank drive joysticks in
+  //   equal but opposite deflection. Todo: a sigmoid version.
+  public void turnAngle(double speed, double angle) { // angle in radians
+    double inches = angle * DRIVE_WHEEL_SEPARATION / 2;
+    encoderDrive(speed, speed, -inches, inches);
+  }
+
+  //  Turn at speed through an angle, with a given radius.
+  public void turnAngleRadiusDrive(double speed, double angle,
+                                   double radius) {
+
+    // One or both turning arcs could be negative.
+    // Degenerate cases: angle = 0, R = 0, R = d/2, R = +infinity (straight
+    // drive).
+    // Calculate 2 target distances, 2 speeds. Then feed 'em to encoderDrive.
+    // Arc lengths are angle * radius adjusted for the drive wheels: one
+    // shorter, the other longer. Speeds need to be adjusted as well.
+    // TODO: handle 4 quadrant cases: forward CW, forward CCW, back CW,
+    //  back CCW
+    // ** Note negative angle enforces backward movement. What would
+    // negative angle and negative radius do?
+    double leftRadius = radius - DRIVE_WHEEL_SEPARATION / 2.0;
+    double rightRadius = radius + DRIVE_WHEEL_SEPARATION / 2.0;
+    double turnAdjustLeft = leftRadius / radius;
+    double turnAdjustRight = rightRadius / radius;
+    double leftArc = leftRadius * angle;
+    double rightArc = rightRadius * angle;
+    double leftSpeed = speed * turnAdjustLeft;
+    double rightSpeed = speed * turnAdjustRight;
+
+    encoderDrive(leftSpeed, rightSpeed, leftArc, rightArc);
+  }
+
+  //    Wrapper for turnAngleRadius
+  // TODO make this a wrapper for encoderDrive instead.
+  public void turnArcRadiusDrive(double speed, double arc, double radius) {
+    double targetAngle = arc / radius;
+    turnAngleRadiusDrive(speed, targetAngle, radius);
+  }
+
   public double turnArcRadiusSigmoid(double startSpeed, double endSpeed,
                                      double arc, double radius) {
     double time;
@@ -648,42 +642,6 @@ public class Pullbot extends GenericFTCRobot {
       rightDrive.setPower(rightSpeed);
     } while (time < time2DoIt);
     return time2DoIt;
-  }
-
-  // TurnAngleArc not implemented.
-
-  //  Begin a left turn at speed, sharpness of turn decided by ratio.
-  // TODO Test on Scrimmage3 build.
-  //    1:  go straight.
-  //    0:  turn axis is left wheel.
-  //    -1: turn axis is between drive wheels. Robot turns on own axis.
-  public void steerLeft(double speed, double ratio) {
-    Range.clip(ratio, -1.0, 1.0);
-    leftDrive.setPower(speed * ratio);
-    rightDrive.setPower(speed);
-  }
-
-  //  Right analog of steerLeft.
-  public void steerRight(double speed, double ratio) {
-    Range.clip(ratio, -1.0, 1.0);
-    leftDrive.setPower(speed);
-    rightDrive.setPower(speed * ratio);
-  }
-
-  //  Drive a curved path by making left wheels turn slower and go
-  //    shorter path by a factor of ratio. The right wheels will spin
-  //    at parameter speed, and travel the full arc.
-  public void turnLeft(double speed, double ratio, double arcInches) {
-    Range.clip(ratio, -1.0, 1.0);
-    encoderDrive(speed * ratio, speed,
-        arcInches * ratio, arcInches);
-  }
-
-  //  Right analog of turnLeft.
-  public void turnRight(double speed, double ratio, double arcInches) {
-    Range.clip(ratio, -1.0, 1.0);
-    encoderDrive(speed, speed * ratio,
-        arcInches, arcInches * ratio);
   }
 
 
