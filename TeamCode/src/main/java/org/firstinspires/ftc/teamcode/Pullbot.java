@@ -76,7 +76,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
-
 /**
  * This is NOT an opmode.
  * <p>
@@ -119,6 +118,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  * v 3.4  1/26/21 Servo arm replaced with heavy, gear driven motor arm. It
  *        has a passive Wobble Goal grabber, capable of scoring it into the Drop
  *        Zone.
+ * v 5.0  2/26/21 v 4 skipped. This version adds new sigmoid movement methods.
  */
 
 public class Pullbot extends GenericFTCRobot {
@@ -160,7 +160,7 @@ public class Pullbot extends GenericFTCRobot {
   public static final double COUNTS_PER_MOTOR_TURN = 1120; // REV HD hex 40:1
   static final double COUNTS_PER_INCH =
       (COUNTS_PER_MOTOR_TURN * DRIVE_GEAR_REDUCTION) /
-          (DRIVE_WHEEL_DIAMETER * Math.PI);
+          (DRIVE_WHEEL_DIAMETER * Math.PI); // = 101.859
   static final double DISTANCE_PER_TURN = DRIVE_WHEEL_DIAMETER * Math.PI;
   /// 11.00" per second.
   // NeveRest40 free run: 160 rpm. Go about 80% of that, so encoders work at
@@ -572,6 +572,47 @@ public class Pullbot extends GenericFTCRobot {
   public void turnArcRadiusDrive(double speed, double arc, double radius) {
     double targetAngle = arc / radius;
     turnAngleRadiusDrive(speed, targetAngle, radius);
+  }
+
+  public int DriveDistanceFast (double distance) {
+    // Motors must RUN_USING_ENCODER.
+    // Start both motors at rest
+    // Error condition: distance > MAX_DRIVE_SPEED. If not, no room for middle
+    // segment. Todo: handle this.
+    double time;
+    runtime.reset();
+    double power = 1.0;
+    int Counts = 0;
+    //double powerScale = endSpeed - startSpeed;
+    // Sigmoid ramp 'em both up to max speed in 1.0 s. The average speed is
+    // half MAX_DRIVE_SPEED * 1s, or 11.82".
+    DriveDistanceSigmoid(0.0, 1.0, MAX_DRIVE_SPEED/2.0);
+    // Error condition: distance less than ramp distances (23.64"). There
+    // should be no middle segment in that case.
+    DriveDistanceSigmoid(1.0, 1.0, distance - MAX_DRIVE_SPEED);
+    // Sigmoid ramp 'em both down to rest, moving that same MAX_DRIVE_SPEED/2.0.
+    DriveDistanceSigmoid(1.0, 0.0, MAX_DRIVE_SPEED/2.0);
+
+    Counts = leftDrive.getCurrentPosition();
+    return Counts;
+  }
+
+  public double DriveDistanceSigmoid(double startSpeed, double endSpeed,
+                                     double distance) {
+    double time;
+    double speed;
+    double speedScale = endSpeed - startSpeed;
+    double averageSpeed = (startSpeed + endSpeed) / 2.0;
+    double time2DoIt = distance / (averageSpeed * MAX_DRIVE_SPEED);
+    runtime.reset();
+    do {
+      time = runtime.time();
+      speed =
+          startSpeed + speedScale * (0.5 - 0.5 * Math.cos(Math.PI * time / time2DoIt));
+      leftDrive.setPower(-speed);
+      rightDrive.setPower(-speed);
+    } while (time < time2DoIt);
+    return time;
   }
 
   public double turnArcRadiusSigmoid(double startSpeed, double endSpeed,

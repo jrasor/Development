@@ -85,7 +85,26 @@ public class Scrimmage5TeleOp extends LinearOpMode {
       //robot.oneStickDrive();
       robot.enableNudge();
       robot.enableArm();
+      // Drive from Goal Zone to front Wall, in position to score Wobbler over
+      // it. Huge radius flattens curve to practically straight.
+      if (gamepad1.a) {
+        robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 1e10);
+        robot.turnArcRadiusSigmoid(1.0, 1.0, 48.0, 1e10);
+        robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 1e10);
+        robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      }
 
+      // Just run the segments straight, no turning.
+      if (gamepad1.y) {
+        robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.DriveDistanceFast (96.0);
+        robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      }
       // check all the trackable targets to see which one (if any) is visible.
       targetVisible = false;
       try {for (VuforiaTrackable trackable : navigator.allTrackables) {
