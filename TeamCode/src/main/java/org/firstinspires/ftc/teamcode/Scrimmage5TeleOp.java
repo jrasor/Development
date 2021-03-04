@@ -74,8 +74,7 @@ public class Scrimmage5TeleOp extends LinearOpMode {
     telemetry.addData("Initialization report", initReport);
     telemetry.update();
 
-    robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    robot.setDriveRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
     waitForStart();
     runtime.reset();
@@ -128,11 +127,9 @@ public class Scrimmage5TeleOp extends LinearOpMode {
       // Drive from Goal Zone to front Wall, in position to score Wobbler over
       // it.
       if (gamepad1.y) {
-        robot.leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.DriveDistanceFastSigmoid (96.0);
-        robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.setDriveRunMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
       }
     }
   }

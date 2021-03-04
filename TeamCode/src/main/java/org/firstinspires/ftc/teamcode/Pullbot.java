@@ -411,7 +411,7 @@ public class Pullbot extends GenericFTCRobot {
 
   /*                      Primitive layer.                    */
   // Task layer methods are built up out of members at this layer.
-  private double temperedControl(double input) {
+  public double temperedControl(double input) {
     return Math.pow(input, 3.0);
   }
 

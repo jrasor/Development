@@ -46,11 +46,10 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name = "Test Joystick", group = "Linear Opmode")
 //@Disabled
 public class TestJoystick extends LinearOpMode {
-  private double temperedControl(double input) {
-    return Math.pow(input, 3.0);
-  }
 
   public void runOpMode() {
+    Pullbot robot = new Pullbot(this);
+    String initReport = robot.init(hardwareMap);
     telemetry.addData("Status", "Initialized");
     telemetry.update();
 
@@ -61,9 +60,9 @@ public class TestJoystick extends LinearOpMode {
 
       double drive = -gamepad1.left_stick_y;
       double turn = gamepad1.right_stick_x;
-      double driveCommand = temperedControl(drive);
+      double driveCommand = robot.temperedControl(drive);
+      double turnCommand = robot.temperedControl(turn);
       driveCommand = Range.clip(driveCommand, -1.0, 1.0);
-      double turnCommand = temperedControl(turn);
       turnCommand = Range.clip(turnCommand, -1.0, 1.0);
 
       // Show the tempered and clipped joystick commands.
