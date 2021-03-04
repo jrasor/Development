@@ -174,8 +174,8 @@ public class Pullbot extends GenericFTCRobot {
 
   // Arm related properties
   public final double ARMSPEED = 0.7; // was 0.5
-  public final int DEPLOYED = 1917;   // arm extended in front of the Pullbot
-  public final int OVER_WALL = 1450;
+  // arm extended in front of the Pullbot. Was 1917.
+  public final int DEPLOYED = 2000;
   public final int STOWED = 0;     // arm retracted back over the Pullbot
 
   public DcMotorEx arm = null;
@@ -408,6 +408,7 @@ public class Pullbot extends GenericFTCRobot {
    *										Drive Train methods
    */
   private double NUDGE_SPEED = 0.20;
+  private double TURN_NUDGE_SPEED = 0.14;
 
   /*                      Primitive layer.                    */
   // Task layer methods are built up out of members at this layer.
@@ -670,13 +671,13 @@ public class Pullbot extends GenericFTCRobot {
     }
     while (currentOpMode.gamepad1.dpad_right) {
       // Nudge robot right on axis.
-      leftDrive.setPower(-0.4*NUDGE_SPEED);
-      rightDrive.setPower(0.4*NUDGE_SPEED);
+      leftDrive.setPower(-TURN_NUDGE_SPEED);
+      rightDrive.setPower(TURN_NUDGE_SPEED);
     }
     while (currentOpMode.gamepad1.dpad_left) {
       // Nudge robot left on axis.
-      leftDrive.setPower(0.4*NUDGE_SPEED);
-      rightDrive.setPower(-0.4*NUDGE_SPEED);
+      leftDrive.setPower(TURN_NUDGE_SPEED);
+      rightDrive.setPower(-TURN_NUDGE_SPEED);
     }
   }
 
@@ -818,7 +819,8 @@ public class Pullbot extends GenericFTCRobot {
         Orientation rotation =
             Orientation.getOrientation(lastLocation, EXTRINSIC,
                 XYZ, DEGREES);
-      } else {
+      } else {  // just sit. Todo: Later, this might be continuing on a likely
+        // bearing until surely gone too far, or a target is visible.
       }
 
       // Report where the robot is located, if we can see a Vuforia image.
@@ -883,6 +885,7 @@ public class Pullbot extends GenericFTCRobot {
   public void Drive2XYHeading (double targetX, double targetY,
                                double targetHeading, double currentX,
                                double currentY, double currentHeading) {
+    // Todo: implement.
 
   }
   // Macros can go here. Most will be used in the opmodes.
