@@ -119,6 +119,8 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
  *        has a passive Wobble Goal grabber, capable of scoring it into the Drop
  *        Zone.
  * v 5.0  2/26/21 v 4 skipped. This version adds new sigmoid movement methods.
+ * v 5.1  3/4/21 code cleanup, tweaked turn nudging strength and DEPLOYED
+ *        position.
  */
 
 public class Pullbot extends GenericFTCRobot {
