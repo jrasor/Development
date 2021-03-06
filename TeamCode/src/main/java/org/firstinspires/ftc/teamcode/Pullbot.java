@@ -753,6 +753,27 @@ public class Pullbot extends GenericFTCRobot {
     rightDrive.setPower(rightMotorPower);
   }
 
+  // Go to a specified relative position relative to robot's current
+  // position, preserving current heading. Imagine the robot at the corner of
+  // a rectangle, aligned with a side. This method moves the robot to the
+  // opposite corner, aligned as at start: the opposite side is parallel to
+  // the starting side.
+  // Set motors to use encoders before calling this.
+  public String Drive2XYSigmoid (double targetX, double targetY) {
+    String reportString = "Starting sigmoid path to opposite corners of " +
+        "rectangle";
+    // Stub: just go left 1 tilee, ahead 2 tiles.
+    // sigmoid turn toward opposite side of rectangle, only halfway there.
+    turnArcRadiusSigmoid(0.0, 0.2, Math.PI/2, 24.0);
+    turnArcRadiusSigmoid(0.2, 0.0, Math.PI/2, 24.0);
+    //robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 185.0); // Path C in Auto
+    //robot.turnArcRadiusSigmoid(1.0, 1.0, 78.0, 185.0);
+    //robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 185.0);
+    // sigmoid turn in the opposite direction, covering the other half of the
+    // path.
+    return reportString;
+  }
+
   // Go to a specified location of the Field, arriving at a specified heading.
   // It needs the current robot location updated in real time by Vuforia.
   public String Drive2XYHeading (double targetX, double targetY,

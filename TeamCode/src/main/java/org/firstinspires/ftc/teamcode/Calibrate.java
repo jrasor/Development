@@ -40,6 +40,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 /*
  * Drive a robot around, and put it on a convenient starting place like a
@@ -78,6 +79,7 @@ public class Calibrate extends LinearOpMode {
     telemetry.addData("  Blue X button", "90° turn CCW, 24\" radius.");
     telemetry.addData("  Red B button", "90° turn CW, 24\" radius.");
     telemetry.addData("  Green A button", "90° spin CW on own axis.");
+    telemetry.addData("  Trigger", "forward 2 tiles, left 1.");
     telemetry.update();
     waitForStart();
 
@@ -108,6 +110,19 @@ public class Calibrate extends LinearOpMode {
         // amounts, opposite
         // directions.
         robot.turnAngle(TURN_SPEED, -Math.PI / 2);
+      }
+      if (gamepad1.left_trigger > 0) {
+        // Sigmoid drive forward 2 tiles and left 1 tile.
+        //robot.Drive2XYSigmoid(24.0, 48.0);
+        // Make sure we're using the encoders
+        robot.setDriveRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // Stub: run the outgoing C path.
+        //robot.turnArcRadiusSigmoid(0.0, 1.0, 24.0, 185.0);
+        //robot.turnArcRadiusSigmoid(1.0, 1.0, 78.0, 185.0);
+        //robot.turnArcRadiusSigmoid(1.0, 0.0, 24.0, 185.0);
+        // Stub: run something like outgoing path C.
+        robot.turnArcRadiusSigmoid(0.0, 0.5, 24.0, 24.0);
+        robot.turnArcRadiusSigmoid(0.5, 0.0, 24.0, -24.0);
       }
     }
   }
